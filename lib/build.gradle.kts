@@ -5,9 +5,9 @@ plugins {
 
 android {
     ndkVersion = "25.2.9519653"
-    compileSdkVersion = "android-31"
+    compileSdkVersion = "android-33"
     defaultConfig {
-        minSdkVersion(31)
+        minSdkVersion(29)
     }
 
     buildTypes {
@@ -25,7 +25,7 @@ android {
         }
     }
 
-    buildToolsVersion = "30.0.3"
+    buildToolsVersion = "34.0.0"
 }
 
 dependencies {
