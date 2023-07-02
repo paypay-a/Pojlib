@@ -594,7 +594,7 @@ OSMesaContext (*OSMesaGetCurrentContext_p) (void);
 OSMesaContext  (*OSMesaCreateContext_p) (GLenum format, OSMesaContext sharelist);
 GLubyte* (*glGetString_p) (GLenum name);
 
-void* gbuffer;
+static void* gbuffer;
 
 void pojav_openGLOnLoad() {
 }
@@ -709,8 +709,8 @@ void dlsym_OSMesa() {
         abort();
     }
     void* dl_handle;
-    dl_handle = dlopen(alt_path, RTLD_NOW);
-    if(dl_handle == NULL) dl_handle = dlopen(main_path, RTLD_NOW);
+    dl_handle = dlopen(alt_path, RTLD_NOW|RTLD_GLOBAL);
+    if(dl_handle == NULL) dl_handle = dlopen(main_path, RTLD_NOW|RTLD_GLOBAL);
     if(dl_handle == NULL) abort();
     OSMesaMakeCurrent_p = dlsym(dl_handle, "OSMesaMakeCurrent");
     OSMesaGetCurrentContext_p = dlsym(dl_handle,"OSMesaGetCurrentContext");
@@ -724,10 +724,11 @@ int pojavInit() {
 
     xrEglInit();
 
-    char *natives = getenv("POJAV_NATIVEDIR");
-    char *gpuStuff = getenv("HOME");
-    strcat(natives, "/");
-    void *libvulkan = adrenotools_open_libvulkan(RTLD_NOW, ADRENOTOOLS_DRIVER_CUSTOM, NULL,
+    char *natives;
+    char *gpuStuff;
+    asprintf(&natives, "%s/", getenv("POJAV_NATIVEDIR"));
+    asprintf(&gpuStuff, "%s/gpustuff/", getenv("HOME"));
+    void *libvulkan = adrenotools_open_libvulkan(RTLD_NOW|RTLD_GLOBAL, ADRENOTOOLS_DRIVER_CUSTOM, gpuStuff,
                                                  gpuStuff, natives,
                                                  "libvulkan_freedreno.so", NULL, NULL);
     adrenotools_set_turbo(true);
@@ -737,7 +738,6 @@ int pojavInit() {
     printf("%s\n", vulkanPtrString);
     setenv("VULKAN_PTR", vulkanPtrString, 1);
 
-    setenv("GALLIUM_DRIVER", "zink", 1);
     dlsym_OSMesa();
 
     if (OSMesaCreateContext_p == NULL) {
@@ -835,5 +835,4 @@ Java_org_lwjgl_opengl_GL_getNativeWidthHeight(JNIEnv *env, jobject thiz) {
     return ret;
 }
 void pojavSwapInterval(int interval) {
-    return;
 }

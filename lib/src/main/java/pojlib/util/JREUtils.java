@@ -131,8 +131,8 @@ public class JREUtils {
     public static void relocateLibPath(final Context ctx) {
         sNativeLibDir = ctx.getApplicationInfo().nativeLibraryDir;
 
-        LD_LIBRARY_PATH = ctx.getFilesDir() + "/runtimes/JRE-21/bin" + "/lib64/jli:" + ctx.getFilesDir() + "/runtimes/JRE-21/lib:" +
-                "/system/lib64:lib64/vendor/lib64:/vendor/lib64/hw:" +
+        LD_LIBRARY_PATH = ctx.getFilesDir() + "/runtimes/JRE-21/lib:" +
+                "/system/lib64:/vendor/lib64:/vendor/lib64/hw:" +
                 sNativeLibDir;
     }
 
@@ -148,6 +148,7 @@ public class JREUtils {
         envMap.put("MESA_GLSL_VERSION_OVERRIDE", "460");
         envMap.put("MESA_LOADER_DRIVER_OVERRIDE", "zink");
         envMap.put("POJAV_RENDERER", "vulkan_zink");
+        envMap.put("GALLIUM_DRIVER", "zink");
 
         envMap.put("LD_LIBRARY_PATH", LD_LIBRARY_PATH);
         envMap.put("PATH", activity.getFilesDir() + "/runtimes/JRE-21/bin:" + Os.getenv("PATH"));
@@ -235,7 +236,7 @@ public class JREUtils {
                 "-Djna.boot.library.path=" + ctx.getApplicationInfo().nativeLibraryDir,
                 "-Djna.nosys=true",
                 "-Djava.library.path=" + ctx.getApplicationInfo().nativeLibraryDir,
-                "-Dglfwstub.windowWidth=" + 1280,
+                "-Dglfwstub.windowWidth=" + 1080,
                 "-Dglfwstub.windowHeight=" + 720,
                 "-Dglfwstub.initEgl=false",
                 "-Dlog4j2.formatMsgNoLookups=true", //Log4j RCE mitigation
