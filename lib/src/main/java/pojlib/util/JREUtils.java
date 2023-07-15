@@ -131,15 +131,15 @@ public class JREUtils {
     public static void relocateLibPath(final Context ctx) {
         sNativeLibDir = ctx.getApplicationInfo().nativeLibraryDir;
 
-        LD_LIBRARY_PATH = ctx.getFilesDir() + "/runtimes/JRE-21/lib:" +
-                "/system/lib64:/vendor/lib64:/vendor/lib64/hw:" +
+        LD_LIBRARY_PATH = ctx.getFilesDir() + "/runtimes/JRE-17/bin" + "/lib64/jli:" + ctx.getFilesDir() + "/runtimes/JRE-17/lib:" +
+                "/system/lib64:lib64/vendor/lib64:/vendor/lib64/hw:" +
                 sNativeLibDir;
     }
 
     public static void setJavaEnvironment(Activity activity) throws Throwable {
         Map<String, String> envMap = new ArrayMap<>();
         envMap.put("POJAV_NATIVEDIR", activity.getApplicationInfo().nativeLibraryDir);
-        envMap.put("JAVA_HOME", activity.getFilesDir() + "/runtimes/JRE-21");
+        envMap.put("JAVA_HOME", activity.getFilesDir() + "/runtimes/JRE-17");
         envMap.put("HOME", Constants.MC_DIR);
         envMap.put("TMPDIR", activity.getCacheDir().getAbsolutePath());
         envMap.put("LIBGL_MIPMAP", "3");
@@ -151,7 +151,7 @@ public class JREUtils {
         envMap.put("GALLIUM_DRIVER", "zink");
 
         envMap.put("LD_LIBRARY_PATH", LD_LIBRARY_PATH);
-        envMap.put("PATH", activity.getFilesDir() + "/runtimes/JRE-21/bin:" + Os.getenv("PATH"));
+        envMap.put("PATH", activity.getFilesDir() + "/runtimes/JRE-17/bin:" + Os.getenv("PATH"));
 
         envMap.put("LIBGL_GLES", "/system/lib64/libGLESv2.so");
         envMap.put("LIBGL_EGL", "/system/lib64/libEGL.so");
@@ -173,8 +173,8 @@ public class JREUtils {
             Os.setenv(env.getKey(), env.getValue(), true);
         }
 
-        File serverFile = new File(activity.getFilesDir() + "/runtimes/JRE-21/lib/server/libjvm.so");
-        jvmLibraryPath = activity.getFilesDir() + "/runtimes/JRE-21/lib/" + (serverFile.exists() ? "server" : "client");
+        File serverFile = new File(activity.getFilesDir() + "/runtimes/JRE-17/lib/server/libjvm.so");
+        jvmLibraryPath = activity.getFilesDir() + "/runtimes/JRE-17/lib/" + (serverFile.exists() ? "server" : "client");
         Log.d("DynamicLoader","Base LD_LIBRARY_PATH: "+LD_LIBRARY_PATH);
         Log.d("DynamicLoader","Internal LD_LIBRARY_PATH: "+jvmLibraryPath+":"+LD_LIBRARY_PATH);
         setLdLibraryPath(jvmLibraryPath+":"+LD_LIBRARY_PATH);
@@ -195,8 +195,8 @@ public class JREUtils {
             userArgs.add("-Xms" + API_V1.memoryValue + "M");
             userArgs.add("-Xmx" + API_V1.memoryValue + "M");
         } else {
-            userArgs.add("-Xms" + 3072 + "M");
-            userArgs.add("-Xmx" + 3072 + "M");
+            userArgs.add("-Xms" + 2048 + "M");
+            userArgs.add("-Xmx" + 2048 + "M");
         }
 
         userArgs.add("-Dorg.lwjgl.opengl.libname=" + graphicsLib);
@@ -207,7 +207,7 @@ public class JREUtils {
         userArgs.addAll(JVMArgs);
         System.out.println(JVMArgs);
 
-        runtimeDir = activity.getFilesDir() + "/runtimes/JRE-21";
+        runtimeDir = activity.getFilesDir() + "/runtimes/JRE-17";
 
         initJavaRuntime();
         chdir(Constants.MC_DIR);
@@ -226,7 +226,7 @@ public class JREUtils {
      */
     public static List<String> getJavaArgs(Context ctx) {
         return new ArrayList<>(Arrays.asList(
-                "-Djava.home=" + new File(ctx.getFilesDir(), "runtimes/JRE-21"),
+                "-Djava.home=" + new File(ctx.getFilesDir(), "runtimes/JRE-17"),
                 "-Djava.io.tmpdir=" + ctx.getCacheDir().getAbsolutePath(),
                 "-Duser.home=" + Constants.MC_DIR,
                 "-Duser.language=" + System.getProperty("user.language"),
