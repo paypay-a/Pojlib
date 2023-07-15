@@ -723,21 +723,6 @@ int pojavInit() {
     savedHeight = 720;
 
     xrEglInit();
-
-    char *natives;
-    char *gpuStuff;
-    asprintf(&natives, "%s/", getenv("POJAV_NATIVEDIR"));
-    asprintf(&gpuStuff, "%s/gpustuff/", getenv("HOME"));
-    void *libvulkan = adrenotools_open_libvulkan(RTLD_NOW|RTLD_GLOBAL, ADRENOTOOLS_DRIVER_CUSTOM, gpuStuff,
-                                                 gpuStuff, natives,
-                                                 "libvulkan_freedreno.so", NULL, NULL);
-    adrenotools_set_turbo(true);
-    printf("libvulkan: %p\n", libvulkan);
-    char *vulkanPtrString;
-    asprintf(&vulkanPtrString, "%p", libvulkan);
-    printf("%s\n", vulkanPtrString);
-    setenv("VULKAN_PTR", vulkanPtrString, 1);
-
     dlsym_OSMesa();
 
     if (OSMesaCreateContext_p == NULL) {
@@ -827,6 +812,25 @@ JNIEXPORT JNICALL jlong
 Java_org_lwjgl_opengl_GL_getGraphicsBufferAddr(JNIEnv *env, jobject thiz) {
     return &gbuffer;
 }
+
+JNIEXPORT JNICALL jstring
+Java_pojlib_util_JREUtils_getVkDriver(JNIEnv *env, jobject thiz) {
+    char *natives;
+    char *gpuStuff;
+    asprintf(&natives, "%s/", getenv("POJAV_NATIVEDIR"));
+    asprintf(&gpuStuff, "%s/gpustuff/", getenv("HOME"));
+    void *libvulkan = adrenotools_open_libvulkan(RTLD_NOW|RTLD_GLOBAL, ADRENOTOOLS_DRIVER_CUSTOM, gpuStuff,
+                                                 gpuStuff, natives,
+                                                 "libvulkan_freedreno.so", NULL, NULL);
+    adrenotools_set_turbo(true);
+    printf("libvulkan: %p\n", libvulkan);
+    char *vulkanPtrString;
+    asprintf(&vulkanPtrString, "%p", libvulkan);
+    printf("%s\n", vulkanPtrString);
+
+    return (*env)->NewStringUTF(env, vulkanPtrString);
+}
+
 JNIEXPORT JNICALL jintArray
 Java_org_lwjgl_opengl_GL_getNativeWidthHeight(JNIEnv *env, jobject thiz) {
     jintArray ret = (*env)->NewIntArray(env,2);
