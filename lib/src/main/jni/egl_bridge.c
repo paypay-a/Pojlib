@@ -819,7 +819,7 @@ Java_pojlib_util_JREUtils_getVkDriver(JNIEnv *env, jobject thiz) {
     char *gpuStuff;
     asprintf(&natives, "%s/", getenv("POJAV_NATIVEDIR"));
     asprintf(&gpuStuff, "%s/gpustuff/", getenv("HOME"));
-    void *libvulkan = adrenotools_open_libvulkan(RTLD_NOW|RTLD_GLOBAL, ADRENOTOOLS_DRIVER_CUSTOM, gpuStuff,
+    void *libvulkan = adrenotools_open_libvulkan(RTLD_NOW, ADRENOTOOLS_DRIVER_CUSTOM, gpuStuff,
                                                  gpuStuff, natives,
                                                  "libvulkan_freedreno.so", NULL, NULL);
     adrenotools_set_turbo(true);

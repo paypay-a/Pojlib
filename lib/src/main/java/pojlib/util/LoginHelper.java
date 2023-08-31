@@ -32,7 +32,7 @@ public class LoginHelper {
 
     static {
         try {
-            File cache = new File(Environment.getExternalStorageDirectory() + "/Android/data/com.qcxr.qcxr/files/cache_data/serialized_cache.json");
+            File cache = new File(Constants.USER_HOME + "/cache_data/serialized_cache.json");
             if(!cache.exists()) {
                 cache.getParentFile().mkdirs();
                 cache.createNewFile();

@@ -312,7 +312,7 @@ public class MinecraftInstance {
     public void launchInstance(Activity activity, MinecraftAccount account) {
         try {
             JREUtils.redirectAndPrintJRELog();
-            VLoader.setAndroidInitInfo(activity);
+            VLoader.setAndroidInitInfo(activity.getApplicationContext());
             VLoader.setEGLGlobal(JREUtils.getEGLContextPtr(), JREUtils.getEGLDisplayPtr(), JREUtils.getEGLConfigPtr());
             JREUtils.launchJavaVM(activity, generateLaunchArgs(account), versionName);
         } catch (Throwable e) {
