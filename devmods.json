@@ -2,18 +2,13 @@
 	"1.20.1": [
 		{
 			"slug": "Vivecraft",
-			"version": "0.2",
-			"download_link": "https://github.com/QuestCraftPlusPlus/VivecraftMod/releases/download/v0.1-1.20-Zink/vivecraft.jar"
+			"version": "1.0",
+			"download_link": "https://github.com/QuestCraftPlusPlus/VivecraftMod/releases/download/v1.0-1.20.1-LTS/vivecraft.jar"
 		},
 		{
 			"slug": "Fabric-API",
-			"version": "0.83.1",
-			"download_link": "https://cdn.modrinth.com/data/P7dR8mSH/versions/K1pOTt6K/fabric-api-0.83.1%2B1.20.1.jar"
-		},
-		{
-			"slug": "Simple-Voice-Chat",
-			"version": "2.4.10",
-			"download_link": "https://cdn.modrinth.com/data/9eGKb6K1/versions/krETAxFV/voicechat-fabric-1.20.1-2.4.10.jar"
+			"version": "0.87.0",
+			"download_link": "https://cdn.modrinth.com/data/P7dR8mSH/versions/lcnQpW9C/fabric-api-0.87.0%2B1.20.1.jar"
 		},
 		{
 			"slug": "Lithium",
@@ -32,8 +27,8 @@
 		},
 		{
 			"slug": "Sodium",
-			"version": "0.4.10",
-			"download_link": "https://cdn.modrinth.com/data/AANobbMI/versions/vgceLbdH/sodium-fabric-mc1.20-0.4.10%2Bbuild.27.jar"
+			"version": "0.5.1",
+			"download_link": "https://cdn.modrinth.com/data/AANobbMI/versions/OkwCNtFH/sodium-fabric-mc1.20.1-0.5.1.jar"
 		},
 		{
 			"slug": "Cloth-Config",
@@ -84,13 +79,18 @@
 			"slug": "Simple-Voice-Chat",
 			"version": "2.4.12",
 			"download_link": "https://cdn.modrinth.com/data/9eGKb6K1/versions/NkZguN8n/voicechat-fabric-1.20.1-2.4.12.jar"
+		},
+		{
+			"slug": "Modern-Fix",
+			"version": "5.4.2",
+			"download_link": "https://cdn.modrinth.com/data/nmDcB62a/versions/WYn556RC/modernfix-fabric-5.4.2%2Bmc1.20.1.jar"
 		}
 	],
 	"1.19.4": [
 	  	{
 			"slug": "Vivecraft",
-			"version": "0.1",
-			"download_link": "https://github.com/QuestCraftPlusPlus/VivecraftMod/releases/download/v0.1-1.19.4-Zink/vivecraft.jar"
+			"version": "1.0",
+			"download_link": "https://github.com/QuestCraftPlusPlus/VivecraftMod/releases/download/v1.0-1.19.4-LTS/vivecraft.jar"
 		},
 		{
 			"slug": "Fabric-API",
@@ -186,6 +186,11 @@
 			"slug": "Noxesium",
 			"version": "0.1.8",
 			"download_link": "https://cdn.modrinth.com/data/Kw7Sm3Xf/versions/5QKzTtlI/noxesium-0.1.8.jar"
+		},
+		{
+			"slug": "Modern-Fix",
+			"version": "5.4.2",
+			"download_link": "https://cdn.modrinth.com/data/nmDcB62a/versions/Ggtcd6Lc/modernfix-fabric-5.4.2%2Bmc1.19.4.jar"
 		}
 	],
 	"1.19.3": [
@@ -279,7 +284,7 @@
 	"1.19.2": [
 	  	{
 			"slug": "Vivecraft",
-			"version": "0.1",
+			"version": "1.0",
 			"download_link": "https://github.com/QuestCraftPlusPlus/VivecraftMod/releases/download/v0.1-1.19.2-Zink/vivecraft.jar"
 		},
 		{
@@ -361,13 +366,18 @@
 			"slug": "Noxesium",
 			"version": "0.1.4",
 			"download_link": "https://cdn.modrinth.com/data/Kw7Sm3Xf/versions/WhRq6Q4n/noxesium-0.1.4.jar"
+		},
+		{
+			"slug": "Modern-Fix",
+			"version": "5.4.1",
+			"download_link": "https://cdn.modrinth.com/data/nmDcB62a/versions/YDyqtNIH/modernfix-fabric-5.4.1%2Bmc1.19.2.jar"
 		}
 	],
 	"1.18.2": [
 	  	{
 			"slug": "Vivecraft",
-			"version": "0.1",
-			"download_link": "https://github.com/QuestCraftPlusPlus/VivecraftMod/releases/download/v0.1-1.18.2-Zink/vivecraft.jar"
+			"version": "1.0",
+			"download_link": "https://github.com/QuestCraftPlusPlus/VivecraftMod/releases/download/v1.0-1.18.2-LTS/vivecraft.jar"
 		},
 		{
 			"slug": "Fabric-API",
@@ -453,6 +463,11 @@
 			"slug": "Mod-Menu",
 			"version": "3.2.5",
 			"download_link": "https://cdn.modrinth.com/data/mOgUt4GM/versions/nVxObSbX/modmenu-3.2.5.jar"
+		},
+		{
+			"slug": "Modern-Fix",
+			"version": "5.4.1",
+			"download_link": "https://cdn.modrinth.com/data/nmDcB62a/versions/FGNCOJKF/modernfix-fabric-5.4.1%2Bmc1.18.2.jar"
 		}
 	]
 }

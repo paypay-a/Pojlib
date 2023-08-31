@@ -44,6 +44,9 @@ public class Installer {
 
         StringJoiner classpath = new StringJoiner(File.pathSeparator);
         for (VersionInfo.Library library : versionInfo.libraries) {
+            if(library.name.contains("lwjgl")) {
+                continue;
+            }
             for (int i = 0; i < 5; i++) {
                 if (i == 4) throw new RuntimeException(String.format("Library download of %s failed after 5 retries", library.name));
 
@@ -63,17 +66,15 @@ public class Installer {
                     VersionInfo.Library.Artifact artifact = library.downloads.artifact;
                     libraryFile = new File(gameDir + "/libraries/", artifact.path);
                     sha1 = artifact.sha1;
-                    if (!libraryFile.exists() && !artifact.path.contains("lwjgl")) {
+                    if (!libraryFile.exists()) {
                         Logger.getInstance().appendToLog("Downloading: " + library.name);
                         DownloadUtils.downloadFile(artifact.url, libraryFile);
                     }
                 }
 
-                if (!libraryFile.getAbsolutePath().contains("lwjgl")) {
-                    if(DownloadUtils.compareSHA1(libraryFile, sha1)) {
-                        classpath.add(libraryFile.getAbsolutePath());
-                        break;
-                    }
+                if(DownloadUtils.compareSHA1(libraryFile, sha1)) {
+                    classpath.add(libraryFile.getAbsolutePath());
+                    break;
                 }
             }
         }
@@ -112,6 +113,7 @@ public class Installer {
         FileUtils.writeByteArrayToFile(new File(Constants.MC_DIR + "/config/immediatelyfast.json"), FileUtil.loadFromAssetToByte(activity, "immediatelyfast.json"));
         FileUtils.writeByteArrayToFile(new File(Constants.MC_DIR + "/config/c2me.toml"), FileUtil.loadFromAssetToByte(activity, "c2me.toml"));
         FileUtils.writeByteArrayToFile(new File(Constants.MC_DIR + "/config/moreculling.toml"), FileUtil.loadFromAssetToByte(activity,"moreculling.toml"));
+        FileUtils.writeByteArrayToFile(new File(Constants.MC_DIR + "/config/modernfix-mixins.properties"), FileUtil.loadFromAssetToByte(activity,"modernfix-mixins.properties"));
         FileUtils.writeByteArrayToFile(new File(Constants.MC_DIR + "/options.txt"), FileUtil.loadFromAssetToByte(activity, "options.txt"));
         FileUtils.writeByteArrayToFile(new File(Constants.MC_DIR + "/optionsviveprofiles.txt"), FileUtil.loadFromAssetToByte(activity, "optionsviveprofiles.txt"));
 
