@@ -149,7 +149,7 @@ public class JREUtils {
         envMap.put("MESA_LOADER_DRIVER_OVERRIDE", "zink");
         envMap.put("POJAV_RENDERER", "vulkan_zink");
         envMap.put("GALLIUM_DRIVER", "zink");
-        envMap.put("VULKAN_PTR", getVkDriver());
+        envMap.put("VULKAN_PTR", getVkDriver(Constants.MC_DIR, activity.getApplicationInfo().nativeLibraryDir));
 
         envMap.put("LD_LIBRARY_PATH", LD_LIBRARY_PATH);
         envMap.put("PATH", activity.getFilesDir() + "/runtimes/JRE-17/bin:" + Os.getenv("PATH"));
@@ -302,7 +302,7 @@ public class JREUtils {
     public static native long getEGLContextPtr();
     public static native long getEGLDisplayPtr();
     public static native long getEGLConfigPtr();
-    public static native String getVkDriver();
+    public static native String getVkDriver(String home, String nativeDir);
     public static native int chdir(String path);
     public static native void logToLogger(final Logger logger);
     public static native boolean dlopen(String libPath);

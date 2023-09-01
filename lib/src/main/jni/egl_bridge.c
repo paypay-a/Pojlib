@@ -710,8 +710,14 @@ void dlsym_OSMesa() {
     }
     void* dl_handle;
     dl_handle = dlopen(alt_path, RTLD_NOW|RTLD_GLOBAL);
-    if(dl_handle == NULL) dl_handle = dlopen(main_path, RTLD_NOW|RTLD_GLOBAL);
-    if(dl_handle == NULL) abort();
+    if(dl_handle == NULL) {
+        printf("dlopen failed for libOSMesa! %s\n", dlerror());
+        dl_handle = dlopen(main_path, RTLD_NOW|RTLD_GLOBAL);
+    }
+    if(dl_handle == NULL) {
+        printf("dlopen failed for libOSMesa! %s\n", dlerror());
+        abort();
+    }
     OSMesaMakeCurrent_p = dlsym(dl_handle, "OSMesaMakeCurrent");
     OSMesaGetCurrentContext_p = dlsym(dl_handle,"OSMesaGetCurrentContext");
     OSMesaCreateContext_p = dlsym(dl_handle, "OSMesaCreateContext");
@@ -814,11 +820,11 @@ Java_org_lwjgl_opengl_GL_getGraphicsBufferAddr(JNIEnv *env, jobject thiz) {
 }
 
 JNIEXPORT JNICALL jstring
-Java_pojlib_util_JREUtils_getVkDriver(JNIEnv *env, jobject thiz) {
+Java_pojlib_util_JREUtils_getVkDriver(JNIEnv *env, jobject thiz, jstring homeDir, jstring nativeDir) {
     char *natives;
     char *gpuStuff;
-    asprintf(&natives, "%s/", getenv("POJAV_NATIVEDIR"));
-    asprintf(&gpuStuff, "%s/gpustuff/", getenv("HOME"));
+    asprintf(&natives, "%s/", (*env)->GetStringUTFChars(env, nativeDir, NULL));
+    asprintf(&gpuStuff, "%s/gpustuff/", (*env)->GetStringUTFChars(env, homeDir, NULL));
     void *libvulkan = adrenotools_open_libvulkan(RTLD_NOW, ADRENOTOOLS_DRIVER_CUSTOM, gpuStuff,
                                                  gpuStuff, natives,
                                                  "libvulkan_freedreno.so", NULL, NULL);
