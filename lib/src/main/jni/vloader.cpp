@@ -8,8 +8,13 @@
 #include <unistd.h>
 #include <OpenOVR/openxr_platform.h>
 #include <jni.h>
+#include <android/sharedmem.h>
 #include "log.h"
 #include <GLES3/gl32.h>
+#include <GLES2/gl2ext.h>
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+#include <android/hardware_buffer.h>
 
 static JavaVM* jvm;
 XrInstanceCreateInfoAndroidKHR* OpenComposite_Android_Create_Info;
@@ -17,6 +22,7 @@ XrGraphicsBindingOpenGLESAndroidKHR* OpenComposite_Android_GLES_Binding_Info;
 
 std::string (*OpenComposite_Android_Load_Input_File)(const char *path);
 
+static GLuint framebuffer;
 static std::string load_file(const char *path);
 
 extern "C"
@@ -74,18 +80,57 @@ Java_pojlib_util_VLoader_setEGLGlobal(JNIEnv* env, jclass clazz, jlong ctx, jlon
 }
 
 extern "C"
+JNIEXPORT jlong JNICALL
+Java_org_vivecraft_utils_VLoader_createEGLImage(JNIEnv* env, jclass clazz, jlong buffer) {
+    auto* nativeBuffer = reinterpret_cast<AHardwareBuffer *>(buffer);
+    auto eglGetNativeClientBufferANDROID_p = reinterpret_cast<PFNEGLGETNATIVECLIENTBUFFERANDROIDPROC>(eglGetProcAddress("eglGetNativeClientBufferANDROID"));
+    EGLClientBuffer clientBuffer = eglGetNativeClientBufferANDROID_p(nativeBuffer);
+
+    EGLAttrib args[] = {
+            EGL_IMAGE_PRESERVED, EGL_TRUE,
+            EGL_NONE
+    };
+    EGLImage eglImage = eglCreateImage(eglGetCurrentDisplay(), EGL_NO_CONTEXT, EGL_NATIVE_BUFFER_ANDROID, clientBuffer, args);
+
+    EGLenum eglError = eglGetError();
+    while(eglError != EGL_SUCCESS) {
+        printf("EGL error in createEGLImage! %d.\n", eglError);
+        eglError = eglGetError();
+    }
+
+    GLenum error = glGetError();
+    while(error != GL_NO_ERROR) {
+        printf("OpenGLES error in createEGLImage! %d.\n", error);
+        error = glGetError();
+    }
+
+    return reinterpret_cast<jlong>(eglImage);
+}
+
+extern "C"
 JNIEXPORT jint JNICALL
-Java_org_vivecraft_utils_VLoader_createGLImage(JNIEnv* env, jclass clazz, jint width, jint height) {
+Java_org_vivecraft_utils_VLoader_createGLImage(JNIEnv* env, jclass clazz, jlong eglImage, jint width, jint height) {
+    auto glEGLImageTargetTexture2DOES_p = reinterpret_cast<PFNGLEGLIMAGETARGETTEXTURE2DOESPROC>(eglGetProcAddress("glEGLImageTargetTexture2DOES"));
+
     GLint image;
     glGenTextures(1, reinterpret_cast<GLuint *>(&image));
     glBindTexture(GL_TEXTURE_2D, image);
-    glTexParameterf(GL_TEXTURE_2D , GL_TEXTURE_MIN_FILTER, 9729.0F);
-    glTexParameterf(GL_TEXTURE_2D , GL_TEXTURE_MAG_FILTER, 9729.0F);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB8_ALPHA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    glEGLImageTargetTexture2DOES_p(GL_TEXTURE_2D, (void*) eglImage);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    EGLenum eglError = eglGetError();
+    while(eglError != EGL_SUCCESS) {
+        printf("EGL error in createGLImage! %d.\n", eglError);
+        eglError = eglGetError();
+    }
 
     GLenum error = glGetError();
-    if(error != GL_NO_ERROR) {
-        printf("OpenGLES error! %d.", error);
+    while(error != GL_NO_ERROR) {
+        printf("OpenGLES error in createGLImage! %d.\n", error);
+        error = glGetError();
     }
 
     return image;
@@ -93,15 +138,9 @@ Java_org_vivecraft_utils_VLoader_createGLImage(JNIEnv* env, jclass clazz, jint w
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_org_vivecraft_utils_VLoader_writeImage(JNIEnv* env, jclass clazz, jint tex, jint width, jint height, jlong byteBuf) {
-    void* pixels = reinterpret_cast<void *>(byteBuf);
-    glBindTexture(GL_TEXTURE_2D, tex);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+Java_org_vivecraft_utils_VLoader_flushFrame(JNIEnv* env, jclass clazz, jint nativeImage, jlong eglImage) {
+    glBindTexture(GL_TEXTURE_2D, nativeImage);
 
-    GLenum error = glGetError();
-    if(error != GL_NO_ERROR) {
-        printf("OpenGLES error! %d.", error);
-    }
 }
 
 static std::string load_file(const char *path) {
