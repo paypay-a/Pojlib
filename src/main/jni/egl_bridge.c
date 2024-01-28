@@ -202,6 +202,14 @@ int pojavInit() {
     return 1;
 }
 
+void pojavSetWindowHint(int hint, int value) {
+    // Stub
+}
+
+void pojavPumpEvents(void* window) {
+    // Stub
+}
+
 ANativeWindow_Buffer buf;
 int32_t stride;
 bool stopSwapBuffers;
