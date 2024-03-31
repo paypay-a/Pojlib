@@ -700,9 +700,8 @@ void dlsym_OSMesa() {
 int pojavInit() {
     savedWidth = 1;
     savedHeight = 1;
-    printf("XREGLBridge: Thread name is %d\n", gettid());
 
-    return xrEglInit();
+    xrEglInit();
 }
 
 void pojavSetWindowHint(int hint, int value) {

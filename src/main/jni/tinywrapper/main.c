@@ -5,6 +5,7 @@
 #include <malloc.h>
 
 #include "GL/gl.h"
+#include "GLES3/gl32.h"
 #include "SPIRVCross/include/spirv_cross_c.h"
 #include "shaderc/include/shaderc.h"
 #include "string_utils.h"
@@ -22,20 +23,9 @@ void(*gles_glGetTexLevelParameteriv)(GLenum target, GLint level, GLenum pname, G
 void(*gles_glShaderSource)(GLuint shader, GLsizei count, const GLchar * const *string, const GLint *length);
 GLuint (*gles_glCreateShader) (GLenum shaderType);
 void(*gles_glTexImage2D)(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *data);
-void(*gles_glDrawElementsBaseVertex)(GLenum mode,
-                                  GLsizei count,
-                                  GLenum type,
-                                  void *indices,
-                                  GLint basevertex);
-void (*gles_glGetBufferParameteriv) (GLenum target, GLenum pname, GLint *params);
-void * (*gles_glMapBufferRange) (GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access);
-const GLubyte * (*gles_glGetString) (GLenum name);
-void (*gles_glTexParameterf) (GLenum target, GLenum pname, GLfloat param);
 
 void *glMapBuffer(GLenum target, GLenum access) {
     // Use: GL_EXT_map_buffer_range
-    LOOKUP_FUNC(glGetBufferParameteriv);
-    LOOKUP_FUNC(glMapBufferRange);
 
     GLenum access_range;
     GLint length;
@@ -73,8 +63,8 @@ void *glMapBuffer(GLenum target, GLenum access) {
             break;
     }
 
-    gles_glGetBufferParameteriv(target, GL_BUFFER_SIZE, &length);
-    return gles_glMapBufferRange(target, 0, length, access_range);
+    glGetBufferParameteriv(target, GL_BUFFER_SIZE, &length);
+    return glMapBufferRange(target, 0, length, access_range);
 }
 
 static GLenum currShaderType = GL_VERTEX_SHADER;
@@ -113,8 +103,8 @@ void glShaderSource(GLuint shader, GLsizei count, const GLchar * const *string, 
 
     shaderc_compile_options_t opts = shaderc_compile_options_initialize();
     shaderc_compile_options_set_forced_version_profile(opts, 450, shaderc_profile_core);
-    shaderc_compile_options_set_auto_map_locations(opts, true);
     shaderc_compile_options_set_auto_bind_uniforms(opts, true);
+    shaderc_compile_options_set_auto_map_locations(opts, true);
     shaderc_compile_options_set_target_env(opts, shaderc_target_env_opengl, shaderc_env_version_opengl_4_5);
 
     shaderc_compilation_result_t outSPIRVRes = shaderc_compile_into_spv(compiler, *string,
@@ -194,52 +184,8 @@ void glGetTexLevelParameteriv(GLenum target, GLint level, GLenum pname, GLint *p
     }
 }
 
-void glTexParameterf(GLenum target, GLenum pname, GLfloat param) {
-    LOOKUP_FUNC(glTexParameterf);
-
-    // Not supported, crashes some mods that check
-    // for OpenGL errors
-    if(pname == GL_TEXTURE_LOD_BIAS_EXT) {
-        return;
-    }
-
-    gles_glTexParameterf(target, pname, param);
-}
-
 void glTexImage2D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *data) {
     LOOKUP_FUNC(glTexImage2D)
-
-    // Regal doesn't handle depth formats well
-    // Convert it to sized GLES formats instead
-    if(internalformat == GL_DEPTH_COMPONENT) {
-        switch (type) {
-            case GL_UNSIGNED_SHORT:
-                internalformat = GL_DEPTH_COMPONENT16;
-                break;
-            case GL_UNSIGNED_INT:
-                internalformat = GL_DEPTH_COMPONENT24;
-                break;
-            case GL_FLOAT:
-                internalformat = GL_DEPTH_COMPONENT32F;
-                break;
-            default:
-                printf("Depth texture type %d failed for depth component!\n", type);
-                break;
-        }
-    } else if(internalformat == GL_DEPTH_STENCIL) {
-        switch (type) {
-            case GL_UNSIGNED_INT:
-                internalformat = GL_DEPTH24_STENCIL8;
-                break;
-            case GL_FLOAT:
-                internalformat = GL_DEPTH32F_STENCIL8;
-                break;
-            default:
-                printf("Depth texture type %d failed for depth stencil!\n", type);
-                break;
-        }
-    }
-
     if (isProxyTexture(target)) {
         if (!maxTextureSize) {
             glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
@@ -252,36 +198,5 @@ void glTexImage2D(GLenum target, GLint level, GLint internalformat, GLsizei widt
         // swizzle_internalformat((GLenum *) &internalformat, format, type);
     } else {
         gles_glTexImage2D(target, level, internalformat, width, height, border, format, type, data);
-    }
-}
-
-// Sodium
-void glMultiDrawElementsBaseVertex(	GLenum mode,
-                                       const GLsizei *count,
-                                       GLenum type,
-                                       const void * const *indices,
-                                       GLsizei drawcount,
-                                       const GLint *basevertex) {
-    LOOKUP_FUNC(glDrawElementsBaseVertex);
-    for (int i = 0; i < drawcount; i++) {
-        if (count[i] > 0)
-            gles_glDrawElementsBaseVertex(mode,
-                                     count[i],
-                                     type,
-                                     indices[i],
-                                     basevertex[i]);
-    }
-}
-
-const GLubyte * glGetString(GLenum name) {
-    LOOKUP_FUNC(glGetString);
-
-    switch (name) {
-        case GL_VERSION:
-            return "4.6";
-        case GL_SHADING_LANGUAGE_VERSION:
-            return "4.5";
-        default:
-            return gles_glGetString(name);
     }
 }
