@@ -7,7 +7,7 @@
 #include <android/hardware_buffer.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <EGL/egl.h>
+#include <OpenOVR/openxr_platform.h>
 #include <jni.h>
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_android.h>
@@ -15,7 +15,10 @@
 #include <GLES3/gl32.h>
 
 static JavaVM* jvm;
-static jobject activity;
+XrInstanceCreateInfoAndroidKHR* OpenComposite_Android_Create_Info;
+XrGraphicsBindingOpenGLESAndroidKHR* OpenComposite_Android_GLES_Binding_Info;
+
+std::string (*OpenComposite_Android_Load_Input_File)(const char *path);
 
 extern "C"
 jint JNI_OnLoad(JavaVM* vm, void* reserved) {
@@ -25,22 +28,73 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
     return JNI_VERSION_1_4;
 }
 
+static std::string load_file(const char *path) {
+    // Just read the file from the filesystem, we changed the working directory earlier so
+    // Vivecraft can extract it's manifest files.
+
+    printf("Path: %s\n", path);
+    int fd = open(path, O_RDONLY);
+    if (!fd) {
+        LOGE("Failed to load manifest file %s: %d %s\n", path, errno, strerror(errno));
+    }
+
+    int length = lseek(fd, 0, SEEK_END);
+    lseek(fd, 0, SEEK_SET);
+
+    std::string data;
+    data.resize(length);
+    if (!read(fd, (void *) data.data(), data.size())) {
+        LOGE("Failed to load manifest file %s failed to read: %d %s\n", path, errno, strerror(errno));
+    }
+
+    if (close(fd)) {
+        LOGE("Failed to load manifest file %s failed to close: %d %s\n", path, errno,
+             strerror(errno));
+    }
+
+    return std::move(data);
+}
+
 extern "C"
 JNIEXPORT void JNICALL
 Java_pojlib_util_VLoader_setAndroidInitInfo(JNIEnv *env, jclass clazz, jobject ctx) {
+    OpenComposite_Android_Load_Input_File = load_file;
+
+    env->GetJavaVM(&jvm);
     ctx = env->NewGlobalRef(ctx);
-    activity = ctx;
+    OpenComposite_Android_Create_Info = new XrInstanceCreateInfoAndroidKHR{
+            XR_TYPE_INSTANCE_CREATE_INFO_ANDROID_KHR,
+            nullptr,
+            jvm,
+            ctx
+    };
+
+    PFN_xrInitializeLoaderKHR initializeLoader = nullptr;
+    XrResult res;
+
+    res = xrGetInstanceProcAddr(XR_NULL_HANDLE, "xrInitializeLoaderKHR",
+                                (PFN_xrVoidFunction *) (&initializeLoader));
+
+    if(!XR_SUCCEEDED(res)) {
+        printf("xrGetInstanceProcAddr returned %d.\n", res);
+    }
+
+    XrLoaderInitInfoAndroidKHR loaderInitInfoAndroidKhr = {
+            XR_TYPE_LOADER_INIT_INFO_ANDROID_KHR,
+            nullptr,
+            jvm,
+            ctx
+    };
+
+    res = initializeLoader((const XrLoaderInitInfoBaseHeaderKHR *) &loaderInitInfoAndroidKhr);
+    if(!XR_SUCCEEDED(res)) {
+        printf("xrInitializeLoaderKHR returned %d.\n", res);
+    }
 }
 
 extern "C"
-JNIEXPORT jlong JNICALL
-Java_org_vivecraft_util_VLoader_getEGLCtx(JNIEnv* env, jclass clazz) {
-    return reinterpret_cast<jlong>(eglGetCurrentContext());
-}
-
-extern "C"
-JNIEXPORT jlong JNICALL
-Java_org_vivecraft_util_VLoader_getEGLCfg(JNIEnv* env, jclass clazz) {
+JNIEXPORT void JNICALL
+Java_org_vivecraft_util_VLoader_setEGLGlobal(JNIEnv* env, jclass clazz) {
     EGLConfig cfg;
     EGLint num_configs;
 
@@ -57,23 +111,11 @@ Java_org_vivecraft_util_VLoader_getEGLCfg(JNIEnv* env, jclass clazz) {
     };
 
     eglChooseConfig(eglGetCurrentDisplay(), attribs, &cfg, 1, &num_configs);
-    return reinterpret_cast<jlong>(cfg);
-}
-
-extern "C"
-JNIEXPORT jlong JNICALL
-Java_org_vivecraft_util_VLoader_getEGLDisp(JNIEnv* env, jclass clazz) {
-    return reinterpret_cast<jlong>(eglGetCurrentDisplay());
-}
-
-extern "C"
-JNIEXPORT jlong JNICALL
-Java_org_vivecraft_util_VLoader_getJVMPtr(JNIEnv* env, jclass clazz) {
-    return reinterpret_cast<jlong>(jvm);
-}
-
-extern "C"
-JNIEXPORT jlong JNICALL
-Java_org_vivecraft_util_VLoader_getActivityPtr(JNIEnv* env, jclass clazz) {
-    return reinterpret_cast<jlong>(activity);
+    OpenComposite_Android_GLES_Binding_Info = new XrGraphicsBindingOpenGLESAndroidKHR {
+            XR_TYPE_GRAPHICS_BINDING_OPENGL_ES_ANDROID_KHR,
+            nullptr,
+            (void*)eglGetCurrentDisplay(),
+            (void*) cfg,
+            (void*)eglGetCurrentContext()
+    };
 }
