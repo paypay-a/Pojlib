@@ -30,6 +30,7 @@ JNIEXPORT void JNICALL
 Java_pojlib_util_VLoader_setAndroidInitInfo(JNIEnv *env, jclass clazz, jobject ctx) {
     ctx = env->NewGlobalRef(ctx);
     activity = ctx;
+    env->GetJavaVM(&jvm);
 }
 
 extern "C"
