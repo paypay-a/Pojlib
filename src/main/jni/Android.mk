@@ -1,4 +1,4 @@
- LOCAL_PATH := $(call my-dir)
+LOCAL_PATH := $(call my-dir)
 HERE_PATH := $(LOCAL_PATH)
 
 # include $(HERE_PATH)/crash_dump/libbase/Android.mk
@@ -8,42 +8,49 @@ HERE_PATH := $(LOCAL_PATH)
 LOCAL_PATH := $(HERE_PATH)
 
 include $(CLEAR_VARS)
-LOCAL_MODULE := regal
-LOCAL_SRC_FILES := GL/libRegal.so
-include $(PREBUILT_SHARED_LIBRARY)
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := spirv-cross
-LOCAL_SRC_FILES := tinywrapper/SPIRVCross/libspirv-cross-c-shared.so
-include $(PREBUILT_SHARED_LIBRARY)
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := shaderc
-LOCAL_SRC_FILES := tinywrapper/shaderc/libshaderc_shared.so
-include $(PREBUILT_SHARED_LIBRARY)
-
-include $(CLEAR_VARS)
 LOCAL_MODULE := tinywrapper
-LOCAL_SHARED_LIBRARIES := regal spirv-cross shaderc
-LOCAL_LDLIBS := -lGLESv3
-LOCAL_SRC_FILES := tinywrapper/main.c tinywrapper/string_utils.c
-LOCAL_C_INCLUDES := $(LOCAL_PATH)/tinywrapper
-include $(BUILD_SHARED_LIBRARY)
+LOCAL_SRC_FILES := GL/libtinywrapper.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := openxr_loader
+LOCAL_SRC_FILES := libopenxr_loader.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := occore
+LOCAL_SRC_FILES := ./OpenOVR/libOCCore.a
+include $(PREBUILT_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_SHARED_LIBRARIES := openxr_loader
+LOCAL_MODULE := drvopenxr
+LOCAL_SRC_FILES := ./OpenOVR/libDrvOpenXR.a
+include $(PREBUILT_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := ocovr
+LOCAL_STATIC_LIBRARIES := drvopenxr occore drvopenxr
+LOCAL_SRC_FILES := ./OpenOVR/OCOVR.a
+include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_LDLIBS := -llog -landroid -lGLESv3 -lvulkan -lEGL
-LOCAL_MODULE := vloader
+LOCAL_CFLAGS := -DXR_USE_PLATFORM_ANDROID -DXR_USE_GRAPHICS_API_OPENGL_ES
+LOCAL_SHARED_LIBRARIES := openxr_loader
+LOCAL_WHOLE_STATIC_LIBRARIES := ocovr
+LOCAL_MODULE := openvr_api
         LOCAL_SRC_FILES := \
                     vloader.cpp
 include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 # Link GLESv2 for test
-LOCAL_LDLIBS := -ldl -llog -landroid -lGLESv3 -lEGL
+LOCAL_LDLIBS := -ldl -llog -landroid
 # -lGLESv2
 LOCAL_MODULE := pojavexec
 # LOCAL_CFLAGS += -DDEBUG
-LOCAL_SHARED_LIBRARIES := regal
+LOCAL_SHARED_LIBRARIES := openvr_api tinywrapper
 # -DGLES_TEST
 LOCAL_SRC_FILES := \
     egl_bridge.c \
