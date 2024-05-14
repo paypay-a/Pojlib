@@ -84,6 +84,7 @@ public class JREUtils {
             dlopen(f.getAbsolutePath());
         }
         dlopen(sNativeLibDir + "/libopenal.so");
+        dlopen(sNativeLibDir + "/libopuscodec.so");
     }
 
     public static void redirectAndPrintJRELog() {
@@ -143,7 +144,7 @@ public class JREUtils {
         envMap.put("HOME", instance.gameDir);
         envMap.put("TMPDIR", activity.getCacheDir().getAbsolutePath());
         envMap.put("VR_MODEL", API_V1.model);
-        envMap.put("POJLIB_RENDERER", "regal");
+        envMap.put("POJLIB_RENDERER", "tinywrapper");
 
         envMap.put("LD_LIBRARY_PATH", LD_LIBRARY_PATH);
         envMap.put("PATH", activity.getFilesDir() + "/runtimes/JRE-21/bin:" + Os.getenv("PATH"));
