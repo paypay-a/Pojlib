@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
   push:
   pull_request:
-    branches: [ "master", "QuestCraft" ]
+    branches: [ "master", "QuestCraft", "QuestCraft-1", "QuestCraft-Zink" ]
 
 permissions:
   contents: read
@@ -19,7 +19,7 @@ permissions:
 jobs:
   build:
 
-    runs-on: windows-2022
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
