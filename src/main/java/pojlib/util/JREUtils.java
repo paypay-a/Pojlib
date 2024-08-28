@@ -202,6 +202,7 @@ public class JREUtils {
         userArgs.add("-XX:+AllowUserSignalHandlers");
         userArgs.add("-XX:+DisableExplicitGC");
         userArgs.add("-XX:+UseCriticalJavaThreadPriority");
+        userArgs.add("-XX:-ImplicitNullCheck");
 
         userArgs.add("-Dorg.lwjgl.opengl.libname=" + graphicsLib);
         userArgs.add("-Dorg.lwjgl.opengles.libname=" + "/system/lib64/libGLESv3.so");
