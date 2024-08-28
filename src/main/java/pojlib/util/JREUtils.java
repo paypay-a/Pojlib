@@ -202,6 +202,7 @@ public class JREUtils {
         userArgs.add("-XX:+AllowUserSignalHandlers");
         userArgs.add("-XX:+DisableExplicitGC");
         userArgs.add("-XX:+UseCriticalJavaThreadPriority");
+        userArgs.add("-XX:+UnlockDiagnosticVMOptions");
         userArgs.add("-XX:-ImplicitNullCheck");
 
         userArgs.add("-Dorg.lwjgl.opengl.libname=" + graphicsLib);
