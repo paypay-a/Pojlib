@@ -3,6 +3,7 @@ package pojlib.install;
 import com.google.gson.annotations.SerializedName;
 import pojlib.APIHandler;
 import pojlib.util.Constants;
+import pojlib.util.Version;
 
 public class FabricMeta {
 
@@ -19,11 +20,41 @@ public class FabricMeta {
         return handler.get("versions/loader", FabricVersion[].class);
     }
 
-    public static FabricVersion getLatestStableVersion() {
-        for (FabricVersion version : getVersions()) {
-            if (version.stable) return version;
+    private static Version getVersionFromFabric(FabricVersion fabric) {
+        String[] verName = fabric.version.split("\\.");
+        if(verName.length < 3) {
+            return null;
         }
-        return null;
+        int major = Integer.parseInt(verName[0]);
+        int minor = Integer.parseInt(verName[1]);
+        int patch = Integer.parseInt(verName[2]);
+
+        return new Version(major, minor, patch);
+    }
+
+    public static FabricVersion getLatestVersion() {
+        FabricVersion latest = null;
+        for (FabricVersion version : getVersions()) {
+            if(latest == null) {
+                latest = version;
+                continue;
+            }
+
+            Version newVer = getVersionFromFabric(version);
+            Version latestVer = getVersionFromFabric(latest);
+
+            if(newVer == null || latestVer == null)
+                return null;
+
+            if(latestVer.major < newVer.major) {
+                latest = version;
+            } else if(latestVer.major == newVer.major && latestVer.minor < newVer.major) {
+                latest = version;
+            } else if(latestVer.major == newVer.major && latestVer.minor == newVer.major && latestVer.patch < newVer.patch) {
+                latest = version;
+            }
+        }
+        return latest;
     }
 
     public static VersionInfo getVersionInfo(FabricVersion fabricVersion, String minecraftVersion) {

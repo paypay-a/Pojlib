@@ -148,7 +148,7 @@ public class InstanceHandler {
         VersionInfo modLoaderVersionInfo = null;
         switch (modLoader) {
             case Fabric: {
-                FabricMeta.FabricVersion fabricVersion = FabricMeta.getLatestStableVersion();
+                FabricMeta.FabricVersion fabricVersion = FabricMeta.getLatestVersion();
                 assert fabricVersion != null;
                 modLoaderVersionInfo = FabricMeta.getVersionInfo(fabricVersion, minecraftVersion);
                 break;
