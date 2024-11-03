@@ -29,20 +29,20 @@ public class MinecraftAccount {
         Msa instance = new Msa(activity);
         MinecraftAccount account = instance.performLogin(msToken);
 
-        GsonUtils.objectToJsonFile(gameDir + "/account.json", account);
+        GsonUtils.objectToJsonFile(gameDir + "/" + account.uuid + ".json", account);
         return account;
     }
 
-    public static boolean logout(Activity activity) {
-        File accountFile = new File(activity.getFilesDir() + "/accounts/account.json");
+    public static boolean removeAccount(Activity activity, String uuid) {
+        File accountFile = new File(activity.getFilesDir() + "/accounts/" + uuid + ".json");
         File accountCache = new File(Constants.USER_HOME + "/cache_data");
 
         return accountFile.delete() && accountCache.delete();
     }
 
     //Try this before using login - the account will have been saved to disk if previously logged in
-    public static MinecraftAccount load(String path) {
-        return GsonUtils.jsonFileToObject(path + "/account.json", MinecraftAccount.class);
+    public static MinecraftAccount load(String path, String uuid) {
+        return GsonUtils.jsonFileToObject(path + "/" + uuid + ".json", MinecraftAccount.class);
     }
 
     public static String getSkinFaceUrl(MinecraftAccount account) {

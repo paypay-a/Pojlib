@@ -63,7 +63,7 @@ public class LoginHelper {
         SCOPES.add("XboxLive.offline_access");
     }
 
-    public static MinecraftAccount refreshAccount(Activity activity) {
+    public static MinecraftAccount refreshAccount(Activity activity, String uuid) {
         Set<IAccount> accountsInCache = pca.getAccounts().join();
         IAccount account = accountsInCache.iterator().next();
 
@@ -76,7 +76,7 @@ public class LoginHelper {
 
             result = pca.acquireTokenSilently(silentParameters).join();
             MinecraftAccount acc = new Msa(activity).performLogin(result.accessToken());
-            GsonUtils.objectToJsonFile(activity.getFilesDir() + "/accounts/account.json", acc);
+            GsonUtils.objectToJsonFile(activity.getFilesDir() + "/accounts/" + uuid + ".json", acc);
             return acc;
         } catch (Exception ex) {
             Logger.getInstance().appendToLog("Couldn't refresh token! " + ex);
@@ -102,6 +102,7 @@ public class LoginHelper {
                 }
                 API.profileImage = MinecraftAccount.getSkinFaceUrl(API.currentAcc);
                 API.profileName = API.currentAcc.username;
+                API.profileUUID = API.currentAcc.uuid;
             } catch (ExecutionException | InterruptedException e) {
                 Logger.getInstance().appendToLog("MicrosoftLogin | Something went wrong! Couldn't reach the Microsoft Auth servers.");
                 API.msaMessage = "MicrosoftLogin | Something went wrong! Couldn't reach the Microsoft Auth servers.";

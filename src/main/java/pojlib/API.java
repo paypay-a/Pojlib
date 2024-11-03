@@ -5,6 +5,8 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
 
+import androidx.annotation.Nullable;
+
 import com.google.gson.JsonObject;
 
 import pojlib.account.MinecraftAccount;
@@ -35,6 +37,7 @@ public class API {
     public static String currentDownload;
     public static String profileImage;
     public static String profileName;
+    public static String profileUUID;
     public static String memoryValue = "1800";
     public static boolean developerMods;
     public static MinecraftAccount currentAcc;
@@ -130,14 +133,7 @@ public class API {
      * @throws                  IOException Throws if download of library or asset fails
      */
     public static MinecraftInstances.Instance createNewInstance(Activity activity, MinecraftInstances instances, String instanceName, boolean useDefaultMods, String minecraftVersion, String imageURL) throws IOException {
-
-        if(ignoreInstanceName) {
-            return InstanceHandler.create(activity, instances, instanceName, Constants.USER_HOME, useDefaultMods, minecraftVersion, InstanceHandler.ModLoader.Fabric, imageURL);
-        } else if (instanceName.contains("/") || instanceName.contains("!")) {
-            throw new IOException("You cannot use special characters (!, /, ., etc) when creating instances.");
-        } else {
-            return InstanceHandler.create(activity, instances, instanceName, Constants.USER_HOME, useDefaultMods, minecraftVersion, InstanceHandler.ModLoader.Fabric, imageURL);
-        }
+        return InstanceHandler.create(activity, instances, instanceName, Constants.USER_HOME, useDefaultMods, minecraftVersion, InstanceHandler.ModLoader.Fabric, imageURL);
     }
 
     /**
@@ -187,13 +183,14 @@ public class API {
     }
 
     /**
-     * Logs the user out
+     * Removes the user account
      *
      * @param activity The base directory where minecraft should be setup
-     * @return True if logout was successful
+     * @param username The username of the profile to remove
+     * @return True if removal was successful
      */
-    public static boolean logout(Activity activity) {
-        return MinecraftAccount.logout(activity);
+    public static boolean removeAccount(Activity activity, String username) {
+        return MinecraftAccount.removeAccount(activity, username);
     }
 
     /**
@@ -201,7 +198,7 @@ public class API {
      *
      * @param activity Android activity object
      */
-    public static void login(Activity activity)
+    public static void login(Activity activity, @Nullable String accountName)
     {
         ConnectivityManager connManager = (ConnectivityManager) activity.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkCapabilities capabilities = connManager.getNetworkCapabilities(connManager.getActiveNetwork());
@@ -212,19 +209,21 @@ public class API {
             hasWifi = capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI);
         }
 
-        MinecraftAccount acc = MinecraftAccount.load(activity.getFilesDir() + "/accounts");
+        MinecraftAccount acc = MinecraftAccount.load(activity.getFilesDir() + "/accounts", accountName);
         if(acc != null && (acc.expiresOn >= System.currentTimeMillis() || !hasWifi || acc.isDemoMode)) {
             currentAcc = acc;
             API.profileImage = MinecraftAccount.getSkinFaceUrl(API.currentAcc);
             API.profileName = API.currentAcc.username;
+            API.profileUUID = API.currentAcc.uuid;
             return;
         } else if(acc != null && acc.expiresOn < System.currentTimeMillis()) {
-            currentAcc = LoginHelper.refreshAccount(activity);
+            currentAcc = LoginHelper.refreshAccount(activity, currentAcc.username);
             if(currentAcc == null) {
                 LoginHelper.login(activity);
             } else {
                 API.profileImage = MinecraftAccount.getSkinFaceUrl(API.currentAcc);
                 API.profileName = API.currentAcc.username;
+                API.profileUUID = API.currentAcc.uuid;
                 return;
             }
         }

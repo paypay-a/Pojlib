@@ -58,7 +58,6 @@ public class DownloadUtils {
     public static void downloadFile(String url, File out) throws IOException {
         Objects.requireNonNull(out.getParentFile()).mkdirs();
         File tempOut = File.createTempFile(out.getName(), ".part", out.getParentFile());
-        BufferedOutputStream bos = null;
         try {
             OutputStream bos2 = new BufferedOutputStream(Files.newOutputStream(tempOut.toPath()));
             try {
@@ -76,6 +75,7 @@ public class DownloadUtils {
             throw th3;
         }
     }
+
     public static boolean compareSHA1(File f, @Nullable String sourceSHA) {
         try {
             String sha1_dst;
