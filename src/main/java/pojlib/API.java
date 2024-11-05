@@ -41,6 +41,7 @@ public class API {
     public static String memoryValue = "1800";
     public static boolean developerMods;
     public static MinecraftAccount currentAcc;
+    public static boolean isDemoMode;
     public static MinecraftInstances.Instance currentInstance;
 
     public static boolean advancedDebugger;
@@ -186,11 +187,11 @@ public class API {
      * Removes the user account
      *
      * @param activity The base directory where minecraft should be setup
-     * @param username The username of the profile to remove
+     * @param uuid The uuid of the profile to remove
      * @return True if removal was successful
      */
-    public static boolean removeAccount(Activity activity, String username) {
-        return MinecraftAccount.removeAccount(activity, username);
+    public static boolean removeAccount(Activity activity, String uuid) {
+        return MinecraftAccount.removeAccount(activity, uuid);
     }
 
     /**
@@ -198,7 +199,7 @@ public class API {
      *
      * @param activity Android activity object
      */
-    public static void login(Activity activity, @Nullable String accountName)
+    public static void login(Activity activity, @Nullable String accountUUID)
     {
         ConnectivityManager connManager = (ConnectivityManager) activity.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkCapabilities capabilities = connManager.getNetworkCapabilities(connManager.getActiveNetwork());
@@ -209,7 +210,7 @@ public class API {
             hasWifi = capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI);
         }
 
-        MinecraftAccount acc = MinecraftAccount.load(activity.getFilesDir() + "/accounts", accountName);
+        MinecraftAccount acc = MinecraftAccount.load(activity.getFilesDir() + "/accounts", accountUUID);
         if(acc != null && (acc.expiresOn >= System.currentTimeMillis() || !hasWifi || acc.isDemoMode)) {
             currentAcc = acc;
             API.profileImage = MinecraftAccount.getSkinFaceUrl(API.currentAcc);
@@ -217,7 +218,7 @@ public class API {
             API.profileUUID = API.currentAcc.uuid;
             return;
         } else if(acc != null && acc.expiresOn < System.currentTimeMillis()) {
-            currentAcc = LoginHelper.refreshAccount(activity, currentAcc.username);
+            currentAcc = LoginHelper.refreshAccount(activity, accountUUID);
             if(currentAcc == null) {
                 LoginHelper.login(activity);
             } else {

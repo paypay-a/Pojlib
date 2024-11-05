@@ -43,9 +43,9 @@ public class Msa {
     }
 
     /* Fields used to fill the account  */
-    public static String mcName;
+    public String mcName;
     public String mcToken;
-    public static String mcUuid;
+    public String mcUuid;
     public static boolean doesOwnGame;
     private Activity activity;
     private long mcExpiresOn;
@@ -66,7 +66,7 @@ public class Msa {
             fetchOwnedItems(mcToken);
             checkMcProfile(mcToken);
 
-            MinecraftAccount acc = MinecraftAccount.load(activity.getFilesDir() + "/accounts", mcName);
+            MinecraftAccount acc = MinecraftAccount.load(activity.getFilesDir() + "/accounts", mcUuid);
             if (acc == null) acc = new MinecraftAccount();
             if (doesOwnGame) {
                 acc.accessToken = mcToken;
@@ -74,12 +74,14 @@ public class Msa {
                 acc.uuid = mcUuid;
                 acc.expiresOn = mcExpiresOn;
                 acc.isDemoMode = false;
+                API.isDemoMode = false;
             } else {
                 acc.accessToken = "0";
                 acc.username = "Player";
                 acc.uuid = "00000000-0000-0000-0000-000000000000";
                 acc.expiresOn = 0;
                 acc.isDemoMode = true;
+                API.isDemoMode = true;
             }
 
             return acc;
@@ -204,7 +206,7 @@ public class Msa {
     }
 
     // Returns false for failure //
-    public static boolean checkMcProfile(String mcAccessToken) throws IOException, MSAException, JSONException {
+    public boolean checkMcProfile(String mcAccessToken) throws IOException, MSAException, JSONException {
         URL url = new URL(Constants.MC_PROFILE_URL);
 
         HttpURLConnection conn = (HttpURLConnection)url.openConnection();
