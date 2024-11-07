@@ -3,7 +3,6 @@ package pojlib.util.json;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -11,10 +10,9 @@ import java.util.List;
 import pojlib.account.MinecraftAccount;
 import pojlib.API;
 import pojlib.InstanceHandler;
-import pojlib.account.Msa;
 import pojlib.util.Constants;
-import pojlib.util.DownloadUtils;
-import pojlib.util.FileUtil;
+import pojlib.util.download.DownloadManager;
+import pojlib.util.download.DownloadUtils;
 import pojlib.util.GsonUtils;
 import pojlib.util.Logger;
 
@@ -80,9 +78,9 @@ public class MinecraftInstances {
         private ModsJson downloadCurrentModsJson(String userHome) throws Exception {
             File mods = new File(userHome + "/new_mods.json");
             if(API.developerMods) {
-                DownloadUtils.downloadFile(InstanceHandler.DEV_MODS, mods);
+                DownloadUtils.downloadFile(InstanceHandler.DEV_MODS, mods, new DownloadManager(1));
             } else {
-                DownloadUtils.downloadFile(InstanceHandler.MODS, mods);
+                DownloadUtils.downloadFile(InstanceHandler.MODS, mods, new DownloadManager(1));
             }
 
             return parseModsJson(mods.getAbsolutePath());
@@ -173,7 +171,7 @@ public class MinecraftInstances {
                             newMod.slug + (newMod.type.equals("resourcepack") ? ".zip" : ".jar")
                     );
                     if(!mod.exists() || !extMod.version.equals(newMod.version)) {
-                        DownloadUtils.downloadFile(newMod.download_link, mod);
+                        DownloadUtils.downloadFile(newMod.download_link, mod, new DownloadManager(1));
                         extMod = newMod;
                         break;
                     }
@@ -184,7 +182,7 @@ public class MinecraftInstances {
                             extMod.slug + (extMod.type.equals("resourcepack") ? ".zip" : ".jar")
                     );
                     if(!mod.exists()) {
-                        DownloadUtils.downloadFile(extMod.download_link, mod);
+                        DownloadUtils.downloadFile(extMod.download_link, mod, new DownloadManager(1));
                     }
                 }
                 newExtMods.add(extMod);
@@ -194,12 +192,13 @@ public class MinecraftInstances {
         }
 
         private void downloadAllMods(List<ProjectInfo> newMods) throws IOException {
+            DownloadManager downloadManager = new DownloadManager(newMods.size());
             for(ProjectInfo newMod : newMods) {
                 File mod = new File(
                         gameDir + (newMod.type.equals("mod") ? "/mods" : "/resourcepacks"),
                         newMod.slug + (newMod.type.equals("resourcepack") ? ".zip" : ".jar")
                 );
-                DownloadUtils.downloadFile(newMod.download_link, mod);
+                DownloadUtils.downloadFile(newMod.download_link, mod, downloadManager);
             }
 
             extProjects = newMods.toArray(new ProjectInfo[0]);

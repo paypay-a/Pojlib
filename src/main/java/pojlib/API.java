@@ -33,8 +33,8 @@ public class API {
     public static boolean finishedDownloading = true;
     public static boolean ignoreInstanceName;
     public static boolean customRAMValue = false;
-    public static double downloadStatus;
-    public static String currentDownload;
+    public static double downloadStatus = 0;
+    public static String currentDownload = "";
     public static String profileImage;
     public static String profileName;
     public static String profileUUID;

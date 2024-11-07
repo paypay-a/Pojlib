@@ -49,6 +49,8 @@ import pojlib.input.gamepad.Gamepad;
 import pojlib.util.Constants;
 import pojlib.util.FileUtil;
 import pojlib.util.Logger;
+import pojlib.util.download.DownloadManager;
+import pojlib.util.download.DownloadUtils;
 
 public class UnityPlayerActivity extends ActivityGroup implements IUnityPlayerLifecycleEvents, GrabListener
 {
@@ -93,16 +95,6 @@ public class UnityPlayerActivity extends ActivityGroup implements IUnityPlayerLi
         setContentView(mUnityPlayer);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         mUnityPlayer.requestFocus();
-
-        File jre = new File(this.getFilesDir() + "/runtimes/JRE-22");
-        if (!jre.exists()) {
-            FileUtil.unzipArchiveFromAsset(this, "JRE-22.zip", this.getFilesDir() + "/runtimes/JRE-22");
-            try {
-                Files.copy(Paths.get(this.getApplicationInfo().nativeLibraryDir + "/libawt_xawt.so"), Paths.get(this.getFilesDir() + "/runtimes/JRE-22/lib/libawt_xawt.so"));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
 
         updateWindowSize(this);
         GLOBAL_CLIPBOARD = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
