@@ -49,6 +49,16 @@
 					"slug": "Cloth-Config",
 					"version": "15.0.140+fabric",
 					"download_link": "https://cdn.modrinth.com/data/9s6osm5g/versions/HpMb5wGb/cloth-config-15.0.140-fabric.jar"
+				},
+				{
+					"slug": "BadOptimizations",
+					"version": "2.2.0-1.21.1",
+					"download_link": "https://cdn.modrinth.com/data/g96Z4WVZ/versions/htKsmrXC/BadOptimizations-2.2.0-1.21.1.jar"
+				},
+				{
+					"slug": "Ferrite-Core",
+					"version": "7.0.2-hotfix-fabric",
+					"download_link": "https://cdn.modrinth.com/data/uXXizFIs/versions/bwKMSBhn/ferritecore-7.0.2-hotfix-fabric.jar"
 				}
 			]
 		},
@@ -101,6 +111,11 @@
 					"slug": "Cloth-Config",
 					"version": "15.0.140+fabric",
 					"download_link": "https://cdn.modrinth.com/data/9s6osm5g/versions/HpMb5wGb/cloth-config-15.0.140-fabric.jar"
+				},
+				{
+					"slug": "BadOptimizations",
+					"version": "2.2.0-1.21.1",
+					"download_link": "https://cdn.modrinth.com/data/g96Z4WVZ/versions/htKsmrXC/BadOptimizations-2.2.0-1.21.1.jar"
 				}
 			]
 		},
