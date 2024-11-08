@@ -65,19 +65,24 @@ public class LoginHelper {
 
     public static MinecraftAccount refreshAccount(Activity activity, String uuid) {
         Set<IAccount> accountsInCache = pca.getAccounts().join();
-        IAccount account = accountsInCache.iterator().next();
-
         IAuthenticationResult result;
         try {
-            SilentParameters silentParameters =
-                    SilentParameters
-                            .builder(SCOPES, account)
-                            .build();
+            for (IAccount account : accountsInCache) {
+                SilentParameters silentParameters =
+                        SilentParameters
+                                .builder(SCOPES, account)
+                                .build();
 
-            result = pca.acquireTokenSilently(silentParameters).join();
-            MinecraftAccount acc = new Msa(activity).performLogin(result.accessToken());
-            GsonUtils.objectToJsonFile(activity.getFilesDir() + "/accounts/" + uuid + ".json", acc);
-            return acc;
+                result = pca.acquireTokenSilently(silentParameters).join();
+                MinecraftAccount acc = new Msa(activity).performLogin(result.accessToken());
+                GsonUtils.objectToJsonFile(activity.getFilesDir() + "/accounts/" + acc.uuid + ".json", acc);
+                if (!acc.uuid.equals(uuid)) {
+                    // Refresh was for the wrong acc, try again
+                    continue;
+                }
+                return acc;
+            }
+            return null;
         } catch (Exception ex) {
             Logger.getInstance().appendToLog("Couldn't refresh token! " + ex);
             return null;

@@ -46,7 +46,7 @@ public class MinecraftAccount {
     }
 
     public static String getSkinFaceUrl(MinecraftAccount account) {
-        if (!Msa.doesOwnGame) {
+        if (account.isDemoMode) {
             return Constants.MINOTAR_URL + "/helm/MHF_Steve";
         } else {
             try {
