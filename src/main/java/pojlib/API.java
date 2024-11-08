@@ -199,7 +199,7 @@ public class API {
      *
      * @param activity Android activity object
      */
-    public static void login(Activity activity, @Nullable String accountUUID)
+    public static void login(Activity activity, String accountUUID)
     {
         ConnectivityManager connManager = (ConnectivityManager) activity.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkCapabilities capabilities = connManager.getNetworkCapabilities(connManager.getActiveNetwork());
@@ -208,6 +208,11 @@ public class API {
 
         if(capabilities != null) {
             hasWifi = capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI);
+        }
+
+        if(accountUUID == null) {
+            LoginHelper.login(activity);
+            return;
         }
 
         MinecraftAccount acc = MinecraftAccount.load(activity.getFilesDir() + "/accounts", accountUUID);
@@ -219,9 +224,7 @@ public class API {
             return;
         } else if(acc != null && acc.expiresOn < System.currentTimeMillis()) {
             currentAcc = LoginHelper.refreshAccount(activity, accountUUID);
-            if(currentAcc == null) {
-                LoginHelper.login(activity);
-            } else {
+            if(currentAcc != null) {
                 API.profileImage = MinecraftAccount.getSkinFaceUrl(API.currentAcc);
                 API.profileName = API.currentAcc.username;
                 API.profileUUID = API.currentAcc.uuid;

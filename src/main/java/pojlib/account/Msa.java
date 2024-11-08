@@ -42,12 +42,13 @@ public class Msa {
         XSTS_ERRORS.put(2148916238L, "Your account is a child account, and needs to be added into a Family in order to log in.");
     }
 
+    private final Activity activity;
+
     /* Fields used to fill the account  */
     public String mcName;
     public String mcToken;
     public String mcUuid;
-    public static boolean doesOwnGame;
-    private Activity activity;
+    public boolean doesOwnGame;
     private long mcExpiresOn;
 
     public Msa(Activity currentActivity) {
