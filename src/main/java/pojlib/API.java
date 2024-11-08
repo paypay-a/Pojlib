@@ -199,7 +199,7 @@ public class API {
      *
      * @param activity Android activity object
      */
-    public static void login(Activity activity, String accountUUID)
+    public static void login(Activity activity, @Nullable String accountUUID)
     {
         ConnectivityManager connManager = (ConnectivityManager) activity.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkCapabilities capabilities = connManager.getNetworkCapabilities(connManager.getActiveNetwork());
