@@ -63,21 +63,26 @@ public class LoginHelper {
         SCOPES.add("XboxLive.offline_access");
     }
 
-    public static MinecraftAccount refreshAccount(Activity activity) {
+    public static MinecraftAccount refreshAccount(Activity activity, String uuid) {
         Set<IAccount> accountsInCache = pca.getAccounts().join();
-        IAccount account = accountsInCache.iterator().next();
-
         IAuthenticationResult result;
         try {
-            SilentParameters silentParameters =
-                    SilentParameters
-                            .builder(SCOPES, account)
-                            .build();
+            for (IAccount account : accountsInCache) {
+                SilentParameters silentParameters =
+                        SilentParameters
+                                .builder(SCOPES, account)
+                                .build();
 
-            result = pca.acquireTokenSilently(silentParameters).join();
-            MinecraftAccount acc = new Msa(activity).performLogin(result.accessToken());
-            GsonUtils.objectToJsonFile(activity.getFilesDir() + "/accounts/account.json", acc);
-            return acc;
+                result = pca.acquireTokenSilently(silentParameters).join();
+                MinecraftAccount acc = new Msa(activity).performLogin(result.accessToken());
+                GsonUtils.objectToJsonFile(activity.getFilesDir() + "/accounts/" + acc.uuid + ".json", acc);
+                if (!acc.uuid.equals(uuid)) {
+                    // Refresh was for the wrong acc, try again
+                    continue;
+                }
+                return acc;
+            }
+            return null;
         } catch (Exception ex) {
             Logger.getInstance().appendToLog("Couldn't refresh token! " + ex);
             return null;
@@ -102,6 +107,7 @@ public class LoginHelper {
                 }
                 API.profileImage = MinecraftAccount.getSkinFaceUrl(API.currentAcc);
                 API.profileName = API.currentAcc.username;
+                API.profileUUID = API.currentAcc.uuid;
             } catch (ExecutionException | InterruptedException e) {
                 Logger.getInstance().appendToLog("MicrosoftLogin | Something went wrong! Couldn't reach the Microsoft Auth servers.");
                 API.msaMessage = "MicrosoftLogin | Something went wrong! Couldn't reach the Microsoft Auth servers.";

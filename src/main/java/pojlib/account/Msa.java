@@ -42,12 +42,13 @@ public class Msa {
         XSTS_ERRORS.put(2148916238L, "Your account is a child account, and needs to be added into a Family in order to log in.");
     }
 
+    private final Activity activity;
+
     /* Fields used to fill the account  */
-    public static String mcName;
+    public String mcName;
     public String mcToken;
-    public static String mcUuid;
-    public static boolean doesOwnGame;
-    private Activity activity;
+    public String mcUuid;
+    public boolean doesOwnGame;
     private long mcExpiresOn;
 
     public Msa(Activity currentActivity) {
@@ -66,7 +67,7 @@ public class Msa {
             fetchOwnedItems(mcToken);
             checkMcProfile(mcToken);
 
-            MinecraftAccount acc = MinecraftAccount.load(activity.getFilesDir() + "/accounts");
+            MinecraftAccount acc = MinecraftAccount.load(activity.getFilesDir() + "/accounts", mcUuid);
             if (acc == null) acc = new MinecraftAccount();
             if (doesOwnGame) {
                 acc.accessToken = mcToken;
@@ -74,12 +75,14 @@ public class Msa {
                 acc.uuid = mcUuid;
                 acc.expiresOn = mcExpiresOn;
                 acc.isDemoMode = false;
+                API.isDemoMode = false;
             } else {
                 acc.accessToken = "0";
                 acc.username = "Player";
                 acc.uuid = "00000000-0000-0000-0000-000000000000";
                 acc.expiresOn = 0;
                 acc.isDemoMode = true;
+                API.isDemoMode = true;
             }
 
             return acc;
@@ -204,7 +207,7 @@ public class Msa {
     }
 
     // Returns false for failure //
-    public static boolean checkMcProfile(String mcAccessToken) throws IOException, MSAException, JSONException {
+    public boolean checkMcProfile(String mcAccessToken) throws IOException, MSAException, JSONException {
         URL url = new URL(Constants.MC_PROFILE_URL);
 
         HttpURLConnection conn = (HttpURLConnection)url.openConnection();

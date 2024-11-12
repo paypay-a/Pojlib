@@ -9,13 +9,16 @@ import com.google.gson.JsonObject;
 import org.apache.commons.io.FileUtils;
 
 import pojlib.APIHandler;
+import pojlib.util.download.DownloadManager;
+import pojlib.util.download.DownloadUtils;
 import pojlib.util.json.MinecraftInstances;
 import pojlib.util.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Map;
-import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -34,7 +37,7 @@ public class Installer {
         for (int i = 0; i < 5; i++) {
             if (i == 4) throw new RuntimeException("Client download failed after 5 retries");
 
-            if (!clientFile.exists()) DownloadUtils.downloadFile(minecraftVersionInfo.downloads.client.url, clientFile);
+            if (!clientFile.exists()) DownloadUtils.downloadFile(minecraftVersionInfo.downloads.client.url, clientFile, new DownloadManager(1));
             if (DownloadUtils.compareSHA1(clientFile, minecraftVersionInfo.downloads.client.sha1)) return clientFile.getAbsolutePath();
         }
         return null;
@@ -44,7 +47,6 @@ public class Installer {
     // Returns the classpath of the downloaded libraries
     public static String installLibraries(VersionInfo versionInfo, String gameDir) throws IOException {
         Logger.getInstance().appendToLog("Downloading Libraries for: " + versionInfo.id);
-
         StringJoiner classpath = new StringJoiner(File.pathSeparator);
         for (VersionInfo.Library library : versionInfo.libraries) {
             if(library.name.contains("lwjgl")) {
@@ -63,7 +65,7 @@ public class Installer {
                     sha1 = APIHandler.getRaw(library.url + path + ".sha1");
                     if (!libraryFile.exists()) {
                         Logger.getInstance().appendToLog("Downloading: " + library.name);
-                        DownloadUtils.downloadFile(library.url + path, libraryFile);
+                        DownloadUtils.downloadFile(library.url + path, libraryFile, new DownloadManager(1));
                     }
                 } else {
                     VersionInfo.Library.Artifact artifact = library.downloads.artifact;
@@ -71,7 +73,7 @@ public class Installer {
                     sha1 = artifact.sha1;
                     if (!libraryFile.exists()) {
                         Logger.getInstance().appendToLog("Downloading: " + library.name);
-                        DownloadUtils.downloadFile(artifact.url, libraryFile);
+                        DownloadUtils.downloadFile(artifact.url, libraryFile, new DownloadManager(1));
                     }
                 }
 
@@ -96,10 +98,13 @@ public class Installer {
         Logger.getInstance().appendToLog("Downloading assets");
         JsonObject assets = APIHandler.getFullUrl(minecraftVersionInfo.assetIndex.url, JsonObject.class);
 
+        int totalAssets = assets.getAsJsonObject("objects").size();
+        DownloadManager downloadManager = new DownloadManager(totalAssets);
+
         ThreadPoolExecutor tp = new ThreadPoolExecutor(8, 8, 100, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
 
         for (Map.Entry<String, JsonElement> entry : assets.getAsJsonObject("objects").entrySet()) {
-            AsyncDownload thread = new AsyncDownload(entry, minecraftVersionInfo, gameDir);
+            AsyncDownload thread = new AsyncDownload(entry, gameDir, downloadManager);
             tp.execute(thread);
         }
 
@@ -108,7 +113,21 @@ public class Installer {
             while (!tp.awaitTermination(100, TimeUnit.MILLISECONDS));
         } catch (InterruptedException e) {}
 
-        DownloadUtils.downloadFile(minecraftVersionInfo.assetIndex.url, new File(gameDir + "/assets/indexes/" + minecraftVersionInfo.assets + ".json"));
+        File jre = new File(activity.getFilesDir() + "/runtimes/JRE-22");
+        String jreURL = "https://github.com/QuestCraftPlusPlus/android-openjdk-build-multiarch/releases/download/jre22-6.0.0/JRE-22.zip";
+        try {
+            if (!jre.exists()) {
+                File jreZip = new File(activity.getFilesDir() + "/runtimes/JRE-22.zip");
+                DownloadUtils.downloadFile(jreURL, jreZip, new DownloadManager(1));
+                FileUtil.unzipArchive(jreZip.getPath(), activity.getFilesDir() + "/runtimes/JRE-22");
+                Files.copy(Paths.get(activity.getApplicationInfo().nativeLibraryDir + "/libawt_xawt.so"), Paths.get(activity.getFilesDir() + "/runtimes/JRE-22/lib/libawt_xawt.so"));
+                jreZip.delete();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        DownloadUtils.downloadFile(minecraftVersionInfo.assetIndex.url, new File(gameDir + "/assets/indexes/" + minecraftVersionInfo.assets + ".json"), downloadManager);
 
         FileUtils.writeByteArrayToFile(new File(instance.gameDir + "/config/sodium-options.json"), FileUtil.loadFromAssetToByte(activity, "sodium-options.json"));
         FileUtils.writeByteArrayToFile(new File(instance.gameDir + "/config/vivecraft-config.properties"), FileUtil.loadFromAssetToByte(activity, "vivecraft-config.properties"));
@@ -125,41 +144,46 @@ public class Installer {
     }
 
     public static class AsyncDownload implements Runnable {
-        Map.Entry<String, JsonElement> entry;
-        VersionInfo versionInfo;
-        String gameDir;
+        private final Map.Entry<String, JsonElement> entry;
+        private final String gameDir;
+        private final DownloadManager downloadManager;
+        private final String fileName;
 
+        public AsyncDownload(Map.Entry<String, JsonElement> entry, String gameDir, DownloadManager downloadManager) {
+            this.entry = entry;
+            this.gameDir = gameDir;
+            this.downloadManager = downloadManager;
+            this.fileName = entry.getKey();
+        }
+
+        @Override
         public void run() {
             VersionInfo.Asset asset = new Gson().fromJson(entry.getValue(), VersionInfo.Asset.class);
             String path = asset.hash.substring(0, 2) + "/" + asset.hash;
             File assetFile = new File(gameDir + "/assets/objects/", path);
 
             for (int i = 0; i < 5; i++) {
-                if (i == 4) throw new RuntimeException(String.format("Asset download of %s failed after 5 retries", entry.getKey()));
+                if (i == 4) throw new RuntimeException(String.format("Asset download of %s failed after 5 retries", fileName));
 
                 if (!assetFile.exists()) {
-                    Logger.getInstance().appendToLog("Downloading: " + entry.getKey());
+                    Logger.getInstance().appendToLog("Downloading: " + fileName);
                     try {
-                        DownloadUtils.downloadFile(Constants.MOJANG_RESOURCES_URL + "/" + path, assetFile);
+                        DownloadUtils.downloadFile(Constants.MOJANG_RESOURCES_URL + "/" + path, assetFile, downloadManager);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
                 }
 
                 if (DownloadUtils.compareSHA1(assetFile, asset.hash)) {
+                    downloadManager.fileDownloadComplete(fileName);
                     break;
                 } else {
                     assetFile.delete();
                 }
             }
         }
-
-        public AsyncDownload( Map.Entry<String, JsonElement> entry, VersionInfo versionInfo, String gameDir) {
-            this.entry = entry;
-            this.versionInfo = versionInfo;
-            this.gameDir = gameDir;
-        }
     }
+
 
     //Used for mod libraries, vanilla is handled a different (tbh better) way
     private static String parseLibraryNameToPath(String libraryName) {

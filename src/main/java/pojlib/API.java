@@ -5,6 +5,8 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
 
+import androidx.annotation.Nullable;
+
 import com.google.gson.JsonObject;
 
 import pojlib.account.MinecraftAccount;
@@ -31,13 +33,15 @@ public class API {
     public static boolean finishedDownloading = true;
     public static boolean ignoreInstanceName;
     public static boolean customRAMValue = false;
-    public static double downloadStatus;
-    public static String currentDownload;
+    public static double downloadStatus = 0;
+    public static String currentDownload = "";
     public static String profileImage;
     public static String profileName;
+    public static String profileUUID;
     public static String memoryValue = "1800";
     public static boolean developerMods;
     public static MinecraftAccount currentAcc;
+    public static boolean isDemoMode;
     public static MinecraftInstances.Instance currentInstance;
 
     public static boolean advancedDebugger;
@@ -60,7 +64,7 @@ public class API {
     /**
      * Check if an instance has a mod
      *
-     * @param instance Acquired from {@link API#createNewInstance(Activity, MinecraftInstances, String, boolean, String, String)}
+     * @param instance Acquired from {@link API#createNewInstance(Activity, MinecraftInstances, String, boolean, String, String, String)}
      *                 or {@link API#load(MinecraftInstances, String)}
      * @param name Project name
      * @return True if the project is already in the instance
@@ -73,7 +77,7 @@ public class API {
      * Remove a mod from an instance
      *
      * @param instances Acquired from {@link API#loadAll()}
-     * @param instance Acquired from {@link API#createNewInstance(Activity, MinecraftInstances, String, boolean, String, String)}
+     * @param instance Acquired from {@link API#createNewInstance(Activity, MinecraftInstances, String, boolean, String, String, String)}
      *                 or {@link API#load(MinecraftInstances, String)}
      * @param name project name
      * @return True if the project was deleted
@@ -129,15 +133,8 @@ public class API {
      * @return                  A minecraft instance object
      * @throws                  IOException Throws if download of library or asset fails
      */
-    public static MinecraftInstances.Instance createNewInstance(Activity activity, MinecraftInstances instances, String instanceName, boolean useDefaultMods, String minecraftVersion, String imageURL) throws IOException {
-
-        if(ignoreInstanceName) {
-            return InstanceHandler.create(activity, instances, instanceName, Constants.USER_HOME, useDefaultMods, minecraftVersion, InstanceHandler.ModLoader.Fabric, imageURL);
-        } else if (instanceName.contains("/") || instanceName.contains("!")) {
-            throw new IOException("You cannot use special characters (!, /, ., etc) when creating instances.");
-        } else {
-            return InstanceHandler.create(activity, instances, instanceName, Constants.USER_HOME, useDefaultMods, minecraftVersion, InstanceHandler.ModLoader.Fabric, imageURL);
-        }
+    public static MinecraftInstances.Instance createNewInstance(Activity activity, MinecraftInstances instances, String instanceName, boolean useDefaultMods, String minecraftVersion, String modLoader, String imageURL) throws IOException {
+        return InstanceHandler.create(activity, instances, instanceName, Constants.USER_HOME, useDefaultMods, minecraftVersion, modLoader, imageURL);
     }
 
     /**
@@ -149,14 +146,14 @@ public class API {
      * @return                  A minecraft instance object
      * @throws                  IOException Throws if download of library or asset fails
      */
-    public static MinecraftInstances.Instance createNewInstance(Activity activity, MinecraftInstances instances, String instanceName, String imageURL, String mrpackFile) throws IOException {
+    public static MinecraftInstances.Instance createNewInstance(Activity activity, MinecraftInstances instances, String instanceName, String imageURL, String modLoader, String mrpackFile) throws IOException {
 
         if(ignoreInstanceName) {
-            return InstanceHandler.create(activity, instances, instanceName, Constants.USER_HOME, InstanceHandler.ModLoader.Fabric, mrpackFile, imageURL);
+            return InstanceHandler.create(activity, instances, instanceName, Constants.USER_HOME, modLoader, mrpackFile, imageURL);
         } else if (instanceName.contains("/") || instanceName.contains("!")) {
             throw new IOException("You cannot use special characters (!, /, ., etc) when creating instances.");
         } else {
-            return InstanceHandler.create(activity, instances, instanceName, Constants.USER_HOME, InstanceHandler.ModLoader.Fabric, mrpackFile, imageURL);
+            return InstanceHandler.create(activity, instances, instanceName, Constants.USER_HOME, modLoader, mrpackFile, imageURL);
         }
     }
 
@@ -174,7 +171,7 @@ public class API {
      *
      * @param activity Android activity object
      * @param account Account object
-     * @param instance Instance object from {@link API#createNewInstance(Activity, MinecraftInstances, String, boolean, String, String)}
+     * @param instance Instance object from {@link API#createNewInstance(Activity, MinecraftInstances, String, boolean, String, String, String)}
      *                 or {@link API#load(MinecraftInstances, String)}
      */
     public static void launchInstance(Activity activity, MinecraftAccount account, MinecraftInstances.Instance instance) {
@@ -187,13 +184,17 @@ public class API {
     }
 
     /**
-     * Logs the user out
+     * Removes the user account
      *
      * @param activity The base directory where minecraft should be setup
-     * @return True if logout was successful
+     * @param uuid The uuid of the profile to remove
+     * @return True if removal was successful
      */
-    public static boolean logout(Activity activity) {
-        return MinecraftAccount.logout(activity);
+    public static boolean removeAccount(Activity activity, String uuid) {
+        if(currentAcc.uuid.equals(uuid)) {
+            currentAcc = null;
+        }
+        return MinecraftAccount.removeAccount(activity, uuid);
     }
 
     /**
@@ -201,7 +202,7 @@ public class API {
      *
      * @param activity Android activity object
      */
-    public static void login(Activity activity)
+    public static void login(Activity activity, @Nullable String accountUUID)
     {
         ConnectivityManager connManager = (ConnectivityManager) activity.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkCapabilities capabilities = connManager.getNetworkCapabilities(connManager.getActiveNetwork());
@@ -212,19 +213,25 @@ public class API {
             hasWifi = capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI);
         }
 
-        MinecraftAccount acc = MinecraftAccount.load(activity.getFilesDir() + "/accounts");
+        if(accountUUID == null) {
+            currentAcc = null;
+            LoginHelper.login(activity);
+            return;
+        }
+
+        MinecraftAccount acc = MinecraftAccount.load(activity.getFilesDir() + "/accounts", accountUUID);
         if(acc != null && (acc.expiresOn >= System.currentTimeMillis() || !hasWifi || acc.isDemoMode)) {
             currentAcc = acc;
             API.profileImage = MinecraftAccount.getSkinFaceUrl(API.currentAcc);
             API.profileName = API.currentAcc.username;
+            API.profileUUID = API.currentAcc.uuid;
             return;
         } else if(acc != null && acc.expiresOn < System.currentTimeMillis()) {
-            currentAcc = LoginHelper.refreshAccount(activity);
-            if(currentAcc == null) {
-                LoginHelper.login(activity);
-            } else {
+            currentAcc = LoginHelper.refreshAccount(activity, accountUUID);
+            if(currentAcc != null) {
                 API.profileImage = MinecraftAccount.getSkinFaceUrl(API.currentAcc);
                 API.profileName = API.currentAcc.username;
+                API.profileUUID = API.currentAcc.uuid;
                 return;
             }
         }

@@ -36,7 +36,7 @@ public class InstanceHandler {
     public static final String MODS = "https://raw.githubusercontent.com/QuestCraftPlusPlus/Pojlib/refs/heads/QuestCraft-5.1.0/mods.json";
     public static final String DEV_MODS = "https://raw.githubusercontent.com/QuestCraftPlusPlus/Pojlib/refs/heads/QuestCraft-5.1.0/devmods.json";
 
-    public static MinecraftInstances.Instance create(Activity activity, MinecraftInstances instances, String instanceName, String userHome, ModLoader modLoader, String mrpackFilePath, String imageURL) {
+    public static MinecraftInstances.Instance create(Activity activity, MinecraftInstances instances, String instanceName, String userHome, String modLoader, String mrpackFilePath, String imageURL) {
         File mrpackJson = new File(Constants.USER_HOME + "/instances/" + instanceName.toLowerCase(Locale.ROOT).replaceAll(" ", "_") + "/setup/modrinth.index.json");
 
         mrpackJson.getParentFile().mkdirs();
@@ -105,21 +105,8 @@ public class InstanceHandler {
         return instance;
     }
 
-    public enum ModLoader {
-        Fabric(0),
-        Quilt(1),
-        Forge(2),
-        NeoForge(3);
-
-        public final int index;
-
-        ModLoader(int i) {
-            this.index = i;
-        }
-    }
-
     //creates a new instance of a minecraft version, install game + mod loader, stores non login related launch info to json
-    public static MinecraftInstances.Instance create(Activity activity, MinecraftInstances instances, String instanceName, String gameDir, boolean useDefaultMods, String minecraftVersion, ModLoader modLoader, String imageURL) {
+    public static MinecraftInstances.Instance create(Activity activity, MinecraftInstances instances, String instanceName, String gameDir, boolean useDefaultMods, String minecraftVersion, String modLoader, String imageURL) {
         API.finishedDownloading = false;
         File instancesFile = new File(gameDir + "/instances.json");
         if (instancesFile.exists()) {
@@ -147,16 +134,22 @@ public class InstanceHandler {
 
         VersionInfo modLoaderVersionInfo = null;
         switch (modLoader) {
-            case Fabric: {
+            case "Fabric": {
                 FabricMeta.FabricVersion fabricVersion = FabricMeta.getLatestVersion();
                 assert fabricVersion != null;
                 modLoaderVersionInfo = FabricMeta.getVersionInfo(fabricVersion, minecraftVersion);
                 break;
             }
-            case Quilt: {
+            case "Quilt": {
                 QuiltMeta.QuiltVersion quiltVersion = QuiltMeta.getLatestVersion();
                 assert quiltVersion != null;
                 modLoaderVersionInfo = QuiltMeta.getVersionInfo(quiltVersion, minecraftVersion);
+                break;
+            }
+            case "Forge": {
+
+            }
+            case "NeoForge": {
                 break;
             }
         }

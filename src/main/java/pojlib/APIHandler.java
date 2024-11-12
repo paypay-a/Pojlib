@@ -15,7 +15,8 @@ import java.util.HashMap;
 import java.util.stream.Collectors;
 
 import pojlib.util.Constants;
-import pojlib.util.DownloadUtils;
+import pojlib.util.download.DownloadManager;
+import pojlib.util.download.DownloadUtils;
 import pojlib.util.GsonUtils;
 import pojlib.util.Logger;
 
@@ -112,7 +113,7 @@ public class APIHandler {
     public static String[] getQCSupportedVersions() {
         File versionsJson = new File(Constants.USER_HOME + "/supportedVersions.json");
         try {
-            DownloadUtils.downloadFile(SUPPORTED_VERSIONS, versionsJson);
+            DownloadUtils.downloadFile(SUPPORTED_VERSIONS, versionsJson, new DownloadManager(1));
         } catch (IOException e) {
             Logger.getInstance().appendToLog("Error while grabbing supported versions!\n" + e);
         }
