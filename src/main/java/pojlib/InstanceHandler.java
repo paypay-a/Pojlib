@@ -146,9 +146,7 @@ public class InstanceHandler {
                 modLoaderVersionInfo = QuiltMeta.getVersionInfo(quiltVersion, minecraftVersion);
                 break;
             }
-            case "Forge": {
-
-            }
+            case "Forge":
             case "NeoForge": {
                 break;
             }
