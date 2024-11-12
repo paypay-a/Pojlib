@@ -14,6 +14,8 @@ public class FabricMeta {
         public String version;
         @SerializedName("stable")
         public boolean stable;
+        @SerializedName("separator")
+        public String separator;
     }
 
     public static FabricVersion[] getVersions() {
@@ -21,6 +23,11 @@ public class FabricMeta {
     }
 
     private static Version getVersionFromFabric(FabricVersion fabric) {
+        if(fabric.separator.contains("+")) {
+            // Only used pre-0.11, no use for us
+            return null;
+        }
+
         String[] verName = fabric.version.split("\\.");
         if(verName.length < 3) {
             return null;
@@ -44,7 +51,7 @@ public class FabricMeta {
             Version latestVer = getVersionFromFabric(latest);
 
             if(newVer == null || latestVer == null)
-                return null;
+                continue;
 
             if(latestVer.major < newVer.major) {
                 latest = version;
