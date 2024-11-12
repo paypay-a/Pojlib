@@ -191,6 +191,9 @@ public class API {
      * @return True if removal was successful
      */
     public static boolean removeAccount(Activity activity, String uuid) {
+        if(currentAcc.uuid.equals(uuid)) {
+            currentAcc = null;
+        }
         return MinecraftAccount.removeAccount(activity, uuid);
     }
 
@@ -211,6 +214,7 @@ public class API {
         }
 
         if(accountUUID == null) {
+            currentAcc = null;
             LoginHelper.login(activity);
             return;
         }
