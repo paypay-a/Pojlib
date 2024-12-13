@@ -17,8 +17,8 @@
 			"defaultMods": [
 				{
 					"slug": "Sodium",
-					"version": "0.6.0-beta.2",
-					"download_link": "https://cdn.modrinth.com/data/AANobbMI/versions/CcIWi5Av/sodium-fabric-0.6.0-beta.2%2Bmc1.21.1.jar"
+					"version": "0.6.0",
+					"download_link": "https://cdn.modrinth.com/data/AANobbMI/versions/b70slbHV/sodium-fabric-0.6.0%2Bmc1.21.1.jar"
 				},
 				{
 					"slug": "ModernFix",
@@ -37,8 +37,8 @@
 				},
 				{
 					"slug": "MoreCulling",
-					"version": "v1.0.0-beta.1",
-					"download_link": "https://cdn.modrinth.com/data/51shyZVL/versions/E3M7N09H/moreculling-fabric-1.21.1-1.0.0-beta.1.jar"
+					"version": "v1.0.1",
+					"download_link": "https://cdn.modrinth.com/data/51shyZVL/versions/SOpqvxVv/moreculling-fabric-1.21.1-1.0.1.jar"
 				},
 				{
 					"slug": "Simple-Voice-Chat",
