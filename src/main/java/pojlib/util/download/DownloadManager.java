@@ -30,7 +30,7 @@ public class DownloadManager {
     private void getOverallProgress() {
         int completed = completedFiles.get();
         double overallProgress = ((double) completed / totalFiles) * 100;
-        if (completed == totalFiles) {API.currentDownload = "Finished! Ready to start.";}
+        if (completed == totalFiles) {API.currentDownload = "Finished! Ready to start."; API.finishedDownloading = true;}
         API.downloadStatus = overallProgress;
     }
 }

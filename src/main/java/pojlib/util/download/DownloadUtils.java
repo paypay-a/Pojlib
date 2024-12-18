@@ -4,6 +4,7 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 
+import pojlib.API;
 import pojlib.util.Logger;
 
 import javax.net.ssl.SSLException;
@@ -43,6 +44,7 @@ public class DownloadUtils {
     }
 
     public static void downloadFile(String url, File out, DownloadManager downloadManager) throws IOException {
+        API.finishedDownloading = false;
         Objects.requireNonNull(out.getParentFile()).mkdirs();
         File tempOut = File.createTempFile(out.getName(), ".part", out.getParentFile());
         try {
