@@ -18,19 +18,19 @@
 
 extern "C"
 JNIEXPORT jlong JNICALL
-Java_org_digitalgenesis_VLoader_getEGLDisplay(JNIEnv* env, jclass clazz) {
+Java_org_vivecraft_util_VLoader_getEGLDisplay(JNIEnv* env, jclass clazz) {
     return reinterpret_cast<jlong>(eglGetCurrentDisplay());
 }
 
 extern "C"
 JNIEXPORT jlong JNICALL
-Java_org_digitalgenesis_VLoader_getEGLContext(JNIEnv* env, jclass clazz) {
+Java_org_vivecraft_util_VLoader_getEGLContext(JNIEnv* env, jclass clazz) {
     return reinterpret_cast<jlong>(eglGetCurrentContext());
 }
 
 extern "C"
 JNIEXPORT jlong JNICALL
-Java_org_digitalgenesis_VLoader_getEGLConfig(JNIEnv* env, jclass clazz) {
+Java_org_vivecraft_util_VLoader_getEGLConfig(JNIEnv* env, jclass clazz) {
     EGLConfig cfg;
     EGLint num_configs;
 
@@ -51,22 +51,44 @@ Java_org_digitalgenesis_VLoader_getEGLConfig(JNIEnv* env, jclass clazz) {
 }
 
 extern "C"
+JNIEXPORT void JNICALL
+Java_org_vivecraft_util_VLoader_initOpenXRLoader(JNIEnv* env, jclass clazz) {
+    PFN_xrInitializeLoaderKHR initializeLoader = nullptr;
+    XrResult res;
+
+    res = xrGetInstanceProcAddr(XR_NULL_HANDLE, "xrInitializeLoaderKHR",
+                                (PFN_xrVoidFunction *) (&initializeLoader));
+
+    if (!XR_SUCCEEDED(res)) {
+        printf("xrGetInstanceProcAddr returned %d.\n", res);
+    }
+
+    XrLoaderInitInfoAndroidKHR loaderInitInfoAndroidKhr = {
+            XR_TYPE_LOADER_INIT_INFO_ANDROID_KHR,
+            nullptr,
+            (void *) pojav_environ->dalvikJavaVMPtr,
+            (void *) pojav_environ->activity
+    };
+
+    res = initializeLoader((const XrLoaderInitInfoBaseHeaderKHR *) &loaderInitInfoAndroidKhr);
+    if (!XR_SUCCEEDED(res)) {
+        printf("xrInitializeLoaderKHR returned %d.\n", res);
+    }
+
+    JNIEnv *newEnv;
+    pojav_environ->dalvikJavaVMPtr->AttachCurrentThread(&newEnv, NULL);
+}
+
+extern "C"
 JNIEXPORT jlong JNICALL
-Java_org_digitalgenesis_VLoader_getDalvikVM(JNIEnv* env, jclass clazz) {
+Java_org_vivecraft_util_VLoader_getDalvikVM(JNIEnv* env, jclass clazz) {
     return reinterpret_cast<jlong>(pojav_environ->dalvikJavaVMPtr);
 }
 
 extern "C"
 JNIEXPORT jlong JNICALL
-Java_org_digitalgenesis_VLoader_getDalvikActivity(JNIEnv* env, jclass clazz) {
+Java_org_vivecraft_util_VLoader_getDalvikActivity(JNIEnv* env, jclass clazz) {
     return reinterpret_cast<jlong>(pojav_environ->activity);
-}
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_org_digitalgenesis_VLoader_setupAndroid(JNIEnv* env, jclass clazz) {
-    JNIEnv *newEnv;
-    pojav_environ->dalvikJavaVMPtr->AttachCurrentThread(&newEnv, NULL);
 }
 
 extern "C"
