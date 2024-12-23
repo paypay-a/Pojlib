@@ -4,12 +4,12 @@ plugins {
 
 android {
     ndkVersion = "26.1.10909125"
-    compileSdkVersion = "android-32"
+    compileSdkVersion = "android-34"
     defaultConfig {
         minSdk 29
         multiDexEnabled true
         ndk.stl = "c++_shared"
-        targetSdk 32
+        targetSdk 34
     }
 
     buildTypes {
