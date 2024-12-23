@@ -4,7 +4,6 @@
 # documentation.
 # This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
 # For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
-
 name: Build Pojlib
 
 on:
@@ -20,6 +19,7 @@ jobs:
   build:
     runs-on: windows-2022
 
+    
     steps:
     - uses: actions/checkout@v3
       with:
@@ -40,13 +40,19 @@ jobs:
         local-cache: true
         link-to-sdk: true
     - name: Make Gradle wrapper executable and pull LFS
-      run: git lfs pull | chmod +x ./gradlew
+      run: git lfs pull
     - name: Build with Gradle
       uses: gradle/gradle-build-action@v2
       with:
         arguments: build
-    - name: Upload AAR
+
+    - name: Upload debug
+      uses: actions/upload-artifact@v3
+      with:
+          name: app-release
+          path: wrapper/launcher/build/outputs/apk/release/*
+    - name: Upload release
       uses: actions/upload-artifact@v3
       with:
           name: app-debug
-          path: build/outputs/aar/*
+          path: wrapper/launcher/build/outputs/apk/debug/*
