@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"name": "Pojlib",
+			"path": "."
+		}
+	],
+	"settings": {
+		"java.configuration.updateBuildConfiguration": "interactive"
+	}
+}
