@@ -126,6 +126,7 @@ public class UnityPlayerActivity extends ActivityGroup implements IUnityPlayerLi
             Objects.requireNonNull(lwjgl.getParentFile()).mkdirs();
             FileUtil.write(lwjgl.getAbsolutePath(), lwjglAsset);
         } else if (!FileUtil.matchingAssetFile(lwjgl, lwjglAsset)) {
+            lwjgl.delete();
             Objects.requireNonNull(lwjgl.getParentFile()).mkdirs();
             FileUtil.write(lwjgl.getAbsolutePath(), lwjglAsset);
         }
