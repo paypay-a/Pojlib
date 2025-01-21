@@ -49,7 +49,7 @@ public class Installer {
         Logger.getInstance().appendToLog("Downloading Libraries for: " + versionInfo.id);
         StringJoiner classpath = new StringJoiner(File.pathSeparator);
         for (VersionInfo.Library library : versionInfo.libraries) {
-            if(library.name.contains("lwjgl")) {
+            if(library.name.contains("lwjgl") || (library.name.contains("org.ow2.asm")) & !versionInfo.id.contains("fabric")) {
                 continue;
             }
             for (int i = 0; i < 5; i++) {

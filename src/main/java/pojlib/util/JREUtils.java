@@ -143,7 +143,7 @@ public class JREUtils {
         envMap.put("HOME", instance.gameDir);
         envMap.put("TMPDIR", activity.getCacheDir().getAbsolutePath());
         envMap.put("VR_MODEL", API.model);
-        envMap.put("POJLIB_RENDERER", "regal");
+        envMap.put("POJLIB_RENDERER", "LightThinWrapper");
 
         envMap.put("LD_LIBRARY_PATH", LD_LIBRARY_PATH);
         envMap.put("PATH", activity.getFilesDir() + "/runtimes/JRE-22/bin:" + Os.getenv("PATH"));
@@ -298,7 +298,7 @@ public class JREUtils {
      * @return The name of the loaded library
      */
     public static String loadGraphicsLibrary(){
-        return "libtinywrapper.so";
+        return "libltw.so";
     }
 
     public static native long getEGLContextPtr();
