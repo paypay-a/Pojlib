@@ -7,6 +7,7 @@ import android.view.Choreographer;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import dalvik.annotation.optimization.CriticalNative;
 import pojlib.UnityPlayerActivity;
@@ -181,6 +182,11 @@ public class CallbackBridge {
     public static void restartUnitySession(Activity activity) {
         UnityPlayerActivity unity = (UnityPlayerActivity) activity;
         unity.reinitUnity();
+    }
+
+    public static void stopUnityXR(Activity activity) {
+        UnityPlayerActivity unity = (UnityPlayerActivity) activity;
+        unity.runOnUiThread(() -> unity.mUnityPlayer.unload());
     }
 
     public static void addGrabListener(GrabListener listener) {

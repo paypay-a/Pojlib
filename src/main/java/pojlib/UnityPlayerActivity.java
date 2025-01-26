@@ -46,6 +46,7 @@ import pojlib.input.GrabListener;
 import pojlib.input.LwjglGlfwKeycode;
 import pojlib.input.gamepad.DefaultDataProvider;
 import pojlib.input.gamepad.Gamepad;
+import pojlib.install.Installer;
 import pojlib.util.Constants;
 import pojlib.util.FileUtil;
 import pojlib.util.Logger;
@@ -54,7 +55,7 @@ import pojlib.util.download.DownloadUtils;
 
 public class UnityPlayerActivity extends ActivityGroup implements IUnityPlayerLifecycleEvents, GrabListener
 {
-    protected UnityPlayer mUnityPlayer; // don't change the name of this variable; referenced from native code
+    public UnityPlayer mUnityPlayer; // don't change the name of this variable; referenced from native code
     public static volatile ClipboardManager GLOBAL_CLIPBOARD;
     private Gamepad mGamepad = null;
 
