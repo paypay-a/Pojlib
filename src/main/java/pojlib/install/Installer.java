@@ -9,6 +9,7 @@ import com.google.gson.JsonObject;
 import org.apache.commons.io.FileUtils;
 
 import pojlib.APIHandler;
+import pojlib.UnityPlayerActivity;
 import pojlib.util.download.DownloadManager;
 import pojlib.util.download.DownloadUtils;
 import pojlib.util.json.MinecraftInstances;
@@ -27,6 +28,31 @@ import java.util.concurrent.TimeUnit;
 //This class reads data from a game version json and downloads its contents.
 //This works for the base game as well as mod loaders
 public class Installer {
+
+    public static void installJVM(Activity activity) {
+        File jre = new File(activity.getFilesDir(), "runtimes/JRE");
+        File newRelease = new File(activity.getFilesDir(), "runtimes/release");
+        File currentRelease = new File(jre, "release");
+        String jreURL = "https://github.com/QuestCraftPlusPlus/android-openjdk-build-multiarch/releases/latest/download/JRE.zip";
+        String jreReleaseInfo = "https://github.com/QuestCraftPlusPlus/android-openjdk-build-multiarch/releases/latest/download/release";
+
+        try {
+            DownloadUtils.downloadFile(jreReleaseInfo, newRelease, new DownloadManager(1));
+
+            if (!jre.exists() || (jre.exists() && !FileUtil.matchingAssetFile(newRelease, FileUtils.readFileToByteArray(currentRelease)))) {
+                if (jre.exists()) {
+                    FileUtils.deleteDirectory(jre);
+                }
+                File jreZip = new File(activity.getFilesDir() + "/runtimes/JRE.zip");
+                DownloadUtils.downloadFile(jreURL, jreZip, new DownloadManager(1));
+                FileUtil.unzipArchive(jreZip.getPath(), activity.getFilesDir() + "/runtimes/JRE");
+                Files.copy(Paths.get(activity.getApplicationInfo().nativeLibraryDir + "/libawt_xawt.so"), Paths.get(activity.getFilesDir() + "/runtimes/JRE/lib/libawt_xawt.so"));
+                jreZip.delete();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     // Will only download client if it is missing, however it will overwrite if sha1 does not match the downloaded client
     // Returns client classpath
@@ -48,6 +74,7 @@ public class Installer {
     public static String installLibraries(VersionInfo versionInfo, String gameDir) throws IOException {
         Logger.getInstance().appendToLog("Downloading Libraries for: " + versionInfo.id);
         StringJoiner classpath = new StringJoiner(File.pathSeparator);
+
         for (VersionInfo.Library library : versionInfo.libraries) {
             if(library.name.contains("lwjgl") || (library.name.contains("org.ow2.asm")) & !versionInfo.id.contains("fabric")) {
                 continue;
@@ -112,20 +139,6 @@ public class Installer {
         try {
             while (!tp.awaitTermination(100, TimeUnit.MILLISECONDS));
         } catch (InterruptedException e) {}
-
-        File jre = new File(activity.getFilesDir() + "/runtimes/JRE-22");
-        String jreURL = "https://github.com/QuestCraftPlusPlus/android-openjdk-build-multiarch/releases/download/jre22-6.0.0/JRE-22.zip";
-        try {
-            if (!jre.exists()) {
-                File jreZip = new File(activity.getFilesDir() + "/runtimes/JRE-22.zip");
-                DownloadUtils.downloadFile(jreURL, jreZip, new DownloadManager(1));
-                FileUtil.unzipArchive(jreZip.getPath(), activity.getFilesDir() + "/runtimes/JRE-22");
-                Files.copy(Paths.get(activity.getApplicationInfo().nativeLibraryDir + "/libawt_xawt.so"), Paths.get(activity.getFilesDir() + "/runtimes/JRE-22/lib/libawt_xawt.so"));
-                jreZip.delete();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
         DownloadUtils.downloadFile(minecraftVersionInfo.assetIndex.url, new File(gameDir + "/assets/indexes/" + minecraftVersionInfo.assets + ".json"), downloadManager);
 
@@ -193,5 +206,14 @@ public class Installer {
         String version = parts[2];
 
         return String.format("%s/%s/%s/%s", location, name, version, name + "-" + version + ".jar");
+    }
+
+    // Called before game launch to ensure all files are present
+    public static void prelaunchCheck(Activity activity, MinecraftInstances.Instance instance) throws IOException {
+        UnityPlayerActivity.installLWJGL(activity);
+        installJVM(activity);
+        installClient(MinecraftMeta.getVersionInfo(instance.versionName), Constants.USER_HOME);
+        installLibraries(MinecraftMeta.getVersionInfo(instance.versionName), Constants.USER_HOME);
+        installAssets(MinecraftMeta.getVersionInfo(instance.versionName), Constants.USER_HOME, activity, instance);
     }
 }

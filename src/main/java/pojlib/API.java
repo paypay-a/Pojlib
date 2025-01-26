@@ -11,6 +11,8 @@ import com.google.gson.JsonObject;
 
 import pojlib.account.MinecraftAccount;
 import pojlib.account.Msa;
+import pojlib.install.Installer;
+import pojlib.install.MinecraftMeta;
 import pojlib.util.Logger;
 import pojlib.util.json.MinecraftInstances;
 import pojlib.util.Constants;
@@ -176,10 +178,11 @@ public class API {
      */
     public static void launchInstance(Activity activity, MinecraftAccount account, MinecraftInstances.Instance instance) {
         try {
-            UnityPlayerActivity.installLWJGL(activity);
+            Installer.prelaunchCheck(activity, instance);
         } catch (IOException e) {
-            Logger.getInstance().appendToLog("WARN! LWJGL install failed, " + e);
+            Logger.getInstance().appendToLog("WARN! Instance launch failed, " + e);
         }
+
         InstanceHandler.launchInstance(activity, account, instance);
     }
 
