@@ -206,13 +206,4 @@ public class Installer {
 
         return String.format("%s/%s/%s/%s", location, name, version, name + "-" + version + ".jar");
     }
-
-    // Called before game launch to ensure all files are present
-    public static void prelaunchCheck(Activity activity, MinecraftInstances.Instance instance) throws IOException {
-        UnityPlayerActivity.installLWJGL(activity);
-        installJVM(activity);
-        installClient(MinecraftMeta.getVersionInfo(instance.versionName), Constants.USER_HOME);
-        installLibraries(MinecraftMeta.getVersionInfo(instance.versionName), Constants.USER_HOME);
-        installAssets(MinecraftMeta.getVersionInfo(instance.versionName), Constants.USER_HOME, activity, instance);
-    }
 }
