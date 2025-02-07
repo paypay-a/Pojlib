@@ -184,6 +184,7 @@ public class JREUtils {
         Installer.installClient(MinecraftMeta.getVersionInfo(instance.versionName), Constants.USER_HOME);
         Installer.installLibraries(MinecraftMeta.getVersionInfo(instance.versionName), Constants.USER_HOME);
         Installer.installAssets(MinecraftMeta.getVersionInfo(instance.versionName), Constants.USER_HOME, activity, instance);
+        MinecraftInstances.CheckVivecraftConfig(instance);
     }
 
     public static int launchJavaVM(final Activity activity, final List<String> JVMArgs, MinecraftInstances.Instance instance) throws Throwable {

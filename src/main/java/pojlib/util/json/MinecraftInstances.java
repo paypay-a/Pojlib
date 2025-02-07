@@ -1,5 +1,8 @@
 package pojlib.util.json;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -34,6 +37,32 @@ public class MinecraftInstances {
             return new Instance[0];
         }
         return instances;
+    }
+
+    public static void CheckVivecraftConfig(MinecraftInstances.Instance instance) {
+        File config = new File(instance.gameDir + "/config/vivecraft-client-config.json");
+        if (!config.exists()) {
+            Logger.getInstance().appendToLog("Vivecraft config not found, skipping modification");
+            return;
+        }
+
+        try {
+            Logger.getInstance().appendToLog("Modifying Vivecraft config for QuestCraft");
+            JsonObject obj = GsonUtils.jsonFileToObject(config.getAbsolutePath(), JsonObject.class);
+
+            obj.addProperty("stereoProviderPluginID", "OPENXR");
+            obj.addProperty("alwaysShowUpdates", "false");
+            obj.addProperty("vrEnabled", "true");
+            obj.addProperty("vrToggleButtonEnabled", "false");
+            obj.addProperty("disableGarbageCollectorMessage", "true");
+            obj.addProperty("vrHotswitchingEnabled", "false");
+            obj.addProperty("seated", "false");
+
+            GsonUtils.objectToJsonFile(config.getAbsolutePath(), obj);
+        } catch (Exception e) {
+            Logger.getInstance().appendToLog("Failed to modify Vivecraft config");
+            e.printStackTrace();
+        }
     }
 
     public static class Instance {
