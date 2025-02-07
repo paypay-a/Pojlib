@@ -10,16 +10,13 @@ import androidx.annotation.Nullable;
 import com.google.gson.JsonObject;
 
 import pojlib.account.MinecraftAccount;
-import pojlib.account.Msa;
-import pojlib.install.Installer;
-import pojlib.install.MinecraftMeta;
+import pojlib.util.JREUtils;
 import pojlib.util.Logger;
 import pojlib.util.json.MinecraftInstances;
 import pojlib.util.Constants;
 import pojlib.account.LoginHelper;
 
 import java.io.IOException;
-import java.util.Date;
 
 /**
  * This class is the only class used by the launcher to communicate and talk to pojlib. This keeps pojlib and launcher separate.
@@ -178,7 +175,7 @@ public class API {
      */
     public static void launchInstance(Activity activity, MinecraftAccount account, MinecraftInstances.Instance instance) {
         try {
-            Installer.prelaunchCheck(activity, instance);
+            JREUtils.prelaunchCheck(activity, instance);
         } catch (IOException e) {
             Logger.getInstance().appendToLog("WARN! Instance launch failed, " + e);
         }

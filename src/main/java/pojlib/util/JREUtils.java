@@ -13,6 +13,7 @@ import com.oracle.dalvik.VMLauncher;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -20,6 +21,9 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import pojlib.API;
+import pojlib.UnityPlayerActivity;
+import pojlib.install.Installer;
+import pojlib.install.MinecraftMeta;
 import pojlib.util.json.MinecraftInstances;
 
 public class JREUtils {
@@ -170,6 +174,16 @@ public class JREUtils {
         Log.d("DynamicLoader","Base LD_LIBRARY_PATH: "+LD_LIBRARY_PATH);
         Log.d("DynamicLoader","Internal LD_LIBRARY_PATH: "+jvmLibraryPath+":"+LD_LIBRARY_PATH);
         setLdLibraryPath(jvmLibraryPath+":"+LD_LIBRARY_PATH);
+    }
+
+    // Called before game launch to ensure all files are present and correct
+    public static void prelaunchCheck(Activity activity, MinecraftInstances.Instance instance) throws IOException {
+
+        UnityPlayerActivity.installLWJGL(activity);
+        Installer.installJVM(activity);
+        Installer.installClient(MinecraftMeta.getVersionInfo(instance.versionName), Constants.USER_HOME);
+        Installer.installLibraries(MinecraftMeta.getVersionInfo(instance.versionName), Constants.USER_HOME);
+        Installer.installAssets(MinecraftMeta.getVersionInfo(instance.versionName), Constants.USER_HOME, activity, instance);
     }
 
     public static int launchJavaVM(final Activity activity, final List<String> JVMArgs, MinecraftInstances.Instance instance) throws Throwable {
