@@ -3,7 +3,7 @@
 //
 #include <thread>
 #include <string>
-#include <cerrno>
+#include <errno.h>
 #include <android/hardware_buffer.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -66,8 +66,7 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_org_vivecraft_util_VLoader_setupAndroid(JNIEnv* env, jclass clazz) {
     JNIEnv *newEnv;
-    pojav_environ->dalvikJavaVMPtr->AttachCurrentThread(&newEnv, nullptr);
-    newEnv->CallStaticVoidMethod(pojav_environ->bridgeClazz, pojav_environ->method_stopUnityXR, pojav_environ->activity);
+    pojav_environ->dalvikJavaVMPtr->AttachCurrentThread(&newEnv, NULL);
 }
 
 extern "C"

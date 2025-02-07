@@ -46,7 +46,6 @@ jint JNI_OnLoad(JavaVM* vm, __attribute__((unused)) void* reserved) {
         pojav_environ->method_accessAndroidClipboard = (*pojav_environ->dalvikJNIEnvPtr_ANDROID)->GetStaticMethodID(pojav_environ->dalvikJNIEnvPtr_ANDROID, pojav_environ->bridgeClazz, "accessAndroidClipboard", "(ILjava/lang/String;)Ljava/lang/String;");
         pojav_environ->method_onGrabStateChanged = (*pojav_environ->dalvikJNIEnvPtr_ANDROID)->GetStaticMethodID(pojav_environ->dalvikJNIEnvPtr_ANDROID, pojav_environ->bridgeClazz, "onGrabStateChanged", "(Z)V");
         pojav_environ->method_restartUnity = (*pojav_environ->dalvikJNIEnvPtr_ANDROID)->GetStaticMethodID(pojav_environ->dalvikJNIEnvPtr_ANDROID, pojav_environ->bridgeClazz, "restartUnitySession", "(Landroid/app/Activity;)V");
-        pojav_environ->method_stopUnityXR = (*pojav_environ->dalvikJNIEnvPtr_ANDROID)->GetStaticMethodID(pojav_environ->dalvikJNIEnvPtr_ANDROID, pojav_environ->bridgeClazz, "stopUnityXR", "(Landroid/app/Activity;)V");
         pojav_environ->isUseStackQueueCall = JNI_FALSE;
     } else if (pojav_environ->dalvikJavaVMPtr != vm) {
         __android_log_print(ANDROID_LOG_INFO, "Native", "Saving JVM environ...");
