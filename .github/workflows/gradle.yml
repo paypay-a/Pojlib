@@ -21,7 +21,7 @@ jobs:
     runs-on: windows-2022
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
     - name: Set up JDK 11
@@ -41,21 +41,13 @@ jobs:
         link-to-sdk: true
     - name: Make Gradle wrapper executable and pull LFS
       run: git lfs pull | chmod +x ./gradlew
-    - name: Decode keystore
-      run: |
-        bash -c 'base64 --decode <<< "$QCXR_KEYSTORE_BASE64" > qcxr.keystore'
-      env:
-        QCXR_KEYSTORE_BASE64: ${{ secrets.QCXR_KEYSTORE_BASE64 }}
     - name: Build with Gradle
       uses: gradle/gradle-build-action@v2
       with:
         arguments: build
-      env:
-        QCXR_KEYSTORE_ALIAS: ${{ secrets.QCXR_KEYSTORE_ALIAS }}
-        QCXR_KEYSTORE_PASS: ${{ secrets.QCXR_KEYSTORE_PASS }}
 
     - name: Upload AAR
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
           name: app-debug
           path: build/outputs/aar/*
