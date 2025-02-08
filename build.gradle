@@ -6,7 +6,7 @@ android {
     ndkVersion = "26.1.10909125"
     compileSdkVersion = "android-34"
     defaultConfig {
-        minSdk 29
+        minSdk 30
         multiDexEnabled true
         ndk.stl = "c++_shared"
         targetSdk 34
