@@ -49,5 +49,10 @@ jobs:
     - name: Upload AAR
       uses: actions/upload-artifact@v4
       with:
-          name: app-debug
+          name: AAR
           path: build/outputs/aar/*
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+          name: APK
+          path: wrapper/launcher/build/outputs/apk/*
